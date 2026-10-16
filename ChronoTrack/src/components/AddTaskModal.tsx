@@ -45,7 +45,7 @@ const ALARM_SOUNDS = [
 const SNOOZE_OPTIONS = [5, 10, 15, 20, 30];
 
 export const AddTaskModal: React.FC = () => {
-  const { isAddTaskModalOpen, setIsAddTaskModalOpen, selectedDate, categories, settings, refreshData } = useApp();
+  const { isAddTaskModalOpen, setIsAddTaskModalOpen, selectedDate, setSelectedDate, categories, settings, refreshData } = useApp();
   const isDark = settings.theme === 'dark';
 
   // Core Form State
@@ -228,6 +228,23 @@ export const AddTaskModal: React.FC = () => {
       ? 'weekly' 
       : 'one_time';
 
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+
+    const [sh, sm] = startTime.split(':').map(Number);
+    const startMins = (sh || 0) * 60 + (sm || 0);
+
+    const isSchedulingForToday = !selectedDate || selectedDate === todayStr;
+    const isPastTimeToday = isSchedulingForToday && startMins <= currentMins;
+
+    let targetDate = selectedDate || todayStr;
+    if (isPastTimeToday) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      targetDate = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+    }
+
     const newTask = {
       id: `tsk_${Date.now()}`,
       title,
@@ -241,10 +258,18 @@ export const AddTaskModal: React.FC = () => {
       recurrence,
     };
 
-    db.insertNewTaskInDb(newTask as any, selectedDate);
+    db.insertNewTaskInDb(newTask as any, targetDate, selectedDays);
     refreshData();
     resetForm();
     setIsAddTaskModalOpen(false);
+
+    if (isPastTimeToday) {
+      setSelectedDate(targetDate);
+      Alert.alert(
+        'Scheduled for Tomorrow',
+        `Since ${formatTime12h(startTime)} has already passed today, this task has been scheduled for tomorrow (${targetDate}).`
+      );
+    }
   };
 
   // Delete / Cancel Draft Task

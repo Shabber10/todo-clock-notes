@@ -306,7 +306,7 @@ export function extendOccurrenceInDb(occurrenceId: string, minutes: number) {
 }
 
 
-export function insertNewTaskInDb(task: Task, scheduledDate: string) {
+export function insertNewTaskInDb(task: Task, scheduledDate: string, selectedDays: string[] = []) {
   const database = getDatabase();
   database.runSync(
     `INSERT INTO tasks (id, title, description, categoryId, priority, measurementType, measurementConfig, scheduledStart, scheduledEnd, recurrence)
@@ -325,23 +325,49 @@ export function insertNewTaskInDb(task: Task, scheduledDate: string) {
     ]
   );
 
-  const occId = `occ_${scheduledDate}_${task.id}`;
-  database.runSync(
-    `INSERT INTO occurrences (id, taskId, scheduledDate, scheduledStart, scheduledEnd, status, progressPercentage, actualData, actualDisplay, completedAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-    [
-      occId,
-      task.id,
-      scheduledDate,
-      task.scheduledStart,
-      task.scheduledEnd,
-      'upcoming',
-      0,
-      JSON.stringify({}),
-      '0% completed',
-      null
-    ]
-  );
+  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const datesToSchedule: string[] = [scheduledDate];
+
+  if (task.recurrence && task.recurrence !== 'one_time') {
+    const [y, m, d] = scheduledDate.split('-').map(Number);
+    const baseDate = new Date(y, m - 1, d);
+    for (let i = 1; i < 14; i++) {
+      const nextD = new Date(baseDate);
+      nextD.setDate(baseDate.getDate() + i);
+      const nextDateStr = `${nextD.getFullYear()}-${String(nextD.getMonth() + 1).padStart(2, '0')}-${String(nextD.getDate()).padStart(2, '0')}`;
+      const dayOfWeek = dayKeys[nextD.getDay()];
+
+      if (task.recurrence === 'daily') {
+        datesToSchedule.push(nextDateStr);
+      } else if (task.recurrence === 'weekdays') {
+        if (nextD.getDay() >= 1 && nextD.getDay() <= 5) {
+          datesToSchedule.push(nextDateStr);
+        }
+      } else if (selectedDays.length > 0 && selectedDays.includes(dayOfWeek)) {
+        datesToSchedule.push(nextDateStr);
+      }
+    }
+  }
+
+  for (const dateStr of datesToSchedule) {
+    const occId = `occ_${dateStr}_${task.id}`;
+    database.runSync(
+      `INSERT OR REPLACE INTO occurrences (id, taskId, scheduledDate, scheduledStart, scheduledEnd, status, progressPercentage, actualData, actualDisplay, completedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      [
+        occId,
+        task.id,
+        dateStr,
+        task.scheduledStart,
+        task.scheduledEnd,
+        'upcoming',
+        0,
+        JSON.stringify({}),
+        '0% completed',
+        null
+      ]
+    );
+  }
 }
 
 export function deleteTaskFromDb(taskId: string) {

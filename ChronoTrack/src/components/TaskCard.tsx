@@ -36,10 +36,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ occurrence }) => {
 
   if (isCompleted) {
     effectiveStatus = 'completed';
-  } else if (status === 'in_progress') {
-    effectiveStatus = 'ongoing';
   } else if (isToday) {
-    if (currentMinutes >= startMins && currentMinutes < endMins) {
+    if (status === 'in_progress') {
+      effectiveStatus = 'ongoing';
+    } else if (currentMinutes >= startMins && currentMinutes < endMins) {
       effectiveStatus = 'ongoing';
     } else if (currentMinutes >= endMins) {
       effectiveStatus = 'overdue';
