@@ -9,12 +9,50 @@ interface TaskCardProps {
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ occurrence }) => {
-  const { settings, setSelectedOccurrenceForProgress } = useApp();
+  const { settings, setSelectedOccurrenceForProgress, currentTimeMinutes, selectedDate } = useApp();
   const isDark = settings.theme === 'dark';
   const { task, status, progressPercentage, actualDisplay, scheduledStart, scheduledEnd } = occurrence;
 
   const isCompleted = status === 'completed';
-  const isInProgress = status === 'in_progress';
+
+  // Compute effective dynamic status based on real mobile clock time
+  const now = new Date();
+  const currentMinutes = typeof currentTimeMinutes === 'number'
+    ? currentTimeMinutes
+    : (now.getHours() * 60 + now.getMinutes());
+
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const occDate = occurrence.scheduledDate || selectedDate || todayStr;
+  const isToday = occDate === todayStr;
+
+  const startTimeStr = scheduledStart || task?.scheduledStart || '00:00';
+  const endTimeStr = scheduledEnd || task?.scheduledEnd || '23:59';
+  const [sh, sm] = startTimeStr.split(':').map(Number);
+  const [eh, em] = endTimeStr.split(':').map(Number);
+  const startMins = (sh || 0) * 60 + (sm || 0);
+  const endMins = (eh || 0) * 60 + (em || 0);
+
+  let effectiveStatus: 'completed' | 'ongoing' | 'overdue' | 'upcoming' = 'upcoming';
+
+  if (isCompleted) {
+    effectiveStatus = 'completed';
+  } else if (status === 'in_progress') {
+    effectiveStatus = 'ongoing';
+  } else if (isToday) {
+    if (currentMinutes >= startMins && currentMinutes < endMins) {
+      effectiveStatus = 'ongoing';
+    } else if (currentMinutes >= endMins) {
+      effectiveStatus = 'overdue';
+    } else {
+      effectiveStatus = 'upcoming';
+    }
+  } else if (occDate < todayStr) {
+    effectiveStatus = 'overdue';
+  } else {
+    effectiveStatus = 'upcoming';
+  }
+
+  const isOngoing = effectiveStatus === 'ongoing';
 
   const categoryColor = task.category?.color || '#2563EB';
 
@@ -37,7 +75,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ occurrence }) => {
   return (
     <TouchableOpacity
       testID={`card-task-${occurrence.id}`}
-      accessibilityLabel={`Task ${task.title}, ${status}, ${actualDisplay || 'Not started'}`}
+      accessibilityLabel={`Task ${task.title}, ${effectiveStatus}, ${actualDisplay || 'Not started'}`}
       accessibilityRole="button"
       activeOpacity={0.85}
       onPress={() => setSelectedOccurrenceForProgress(occurrence)}
@@ -66,18 +104,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({ occurrence }) => {
         </View>
 
         {/* Status Pill */}
-        {isCompleted ? (
-          <View style={[styles.statusPill, styles.completedPill]}>
-            <Text style={styles.completedText}>Completed</Text>
-            <Ionicons name="checkmark-circle" size={14} color="#10B981" style={{ marginLeft: 3 }} />
+        {effectiveStatus === 'completed' ? (
+          <View style={[styles.statusPill, isDark ? styles.darkCompletedPill : styles.completedPill]}>
+            <Text style={[styles.completedText, isDark && styles.darkCompletedText]}>Completed</Text>
+            <Ionicons name="checkmark-circle" size={14} color={isDark ? "#34D399" : "#10B981"} style={{ marginLeft: 3 }} />
           </View>
-        ) : isInProgress ? (
-          <View style={[styles.statusPill, styles.inProgressPill]}>
-            <Text style={styles.inProgressText}>In Progress</Text>
+        ) : effectiveStatus === 'ongoing' ? (
+          <View style={[styles.statusPill, isDark ? styles.darkOngoingPill : styles.ongoingPill]}>
+            <View style={styles.ongoingDot} />
+            <Text style={[styles.ongoingText, isDark && styles.darkOngoingText]}>Ongoing</Text>
+          </View>
+        ) : effectiveStatus === 'overdue' ? (
+          <View style={[styles.statusPill, isDark ? styles.darkOverduePill : styles.overduePill]}>
+            <Text style={[styles.overdueText, isDark && styles.darkOverdueText]}>Ended</Text>
           </View>
         ) : (
-          <View style={[styles.statusPill, styles.upcomingPill]}>
-            <Text style={styles.upcomingText}>Upcoming</Text>
+          <View style={[styles.statusPill, isDark ? styles.darkUpcomingPill : styles.upcomingPill]}>
+            <Text style={[styles.upcomingText, isDark && styles.darkUpcomingText]}>Upcoming</Text>
           </View>
         )}
       </View>
@@ -99,12 +142,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({ occurrence }) => {
           accessibilityLabel={`Action for ${task.title}`}
           accessibilityRole="button"
           onPress={() => setSelectedOccurrenceForProgress(occurrence)}
-          style={[styles.actionCircle, isCompleted ? styles.actionCompleted : (isInProgress ? styles.actionActive : styles.actionDefault)]}
+          style={[styles.actionCircle, isCompleted ? styles.actionCompleted : (isOngoing ? styles.actionActive : styles.actionDefault)]}
         >
           <Ionicons
-            name={isCompleted ? "checkmark" : (isInProgress ? "pause" : "play")}
+            name={isCompleted ? "checkmark" : (isOngoing ? "pause" : "play")}
             size={16}
-            color={isCompleted ? "#FFFFFF" : (isInProgress ? "#2563EB" : (isDark ? "#94A3B8" : "#64748B"))}
+            color={isCompleted ? "#FFFFFF" : (isOngoing ? "#2563EB" : (isDark ? "#94A3B8" : "#64748B"))}
           />
         </TouchableOpacity>
       </View>
@@ -181,10 +224,51 @@ const styles = StyleSheet.create({
   completedPill: {
     backgroundColor: '#ECFDF5',
   },
+  darkCompletedPill: {
+    backgroundColor: '#064E3B',
+  },
   completedText: {
     color: '#059669',
     fontSize: 11,
     fontWeight: '700',
+  },
+  darkCompletedText: {
+    color: '#34D399',
+  },
+  ongoingPill: {
+    backgroundColor: '#EFF6FF',
+  },
+  darkOngoingPill: {
+    backgroundColor: '#1E3A8A',
+  },
+  ongoingText: {
+    color: '#2563EB',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  darkOngoingText: {
+    color: '#60A5FA',
+  },
+  ongoingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#2563EB',
+    marginRight: 4,
+  },
+  overduePill: {
+    backgroundColor: '#FEF2F2',
+  },
+  darkOverduePill: {
+    backgroundColor: '#450A0A',
+  },
+  overdueText: {
+    color: '#DC2626',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  darkOverdueText: {
+    color: '#F87171',
   },
   inProgressPill: {
     backgroundColor: '#EFF6FF',
@@ -197,10 +281,16 @@ const styles = StyleSheet.create({
   upcomingPill: {
     backgroundColor: '#FFFBEB',
   },
+  darkUpcomingPill: {
+    backgroundColor: '#451A03',
+  },
   upcomingText: {
     color: '#D97706',
     fontSize: 11,
     fontWeight: '700',
+  },
+  darkUpcomingText: {
+    color: '#FBBF24',
   },
   titleRow: {
     flexDirection: 'row',

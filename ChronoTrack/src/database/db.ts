@@ -113,6 +113,18 @@ export function initDatabase() {
   // Ensure default profile info is neutral
   database.runSync("UPDATE app_settings SET value = 'User' WHERE key = 'userName' AND value = 'Alex Johnson';");
   database.runSync("UPDATE app_settings SET value = '' WHERE key = 'userEmail' AND value = 'alex@example.com';");
+
+  // Ensure install_date is recorded starting from today
+  const installCheck = database.getFirstSync<{ count: number }>(
+    "SELECT count(*) as count FROM app_settings WHERE key = 'install_date';"
+  );
+  if (!installCheck || installCheck.count === 0) {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    database.runSync(
+      "INSERT OR REPLACE INTO app_settings (key, value) VALUES ('install_date', ?);",
+      [todayStr]
+    );
+  }
 }
 
 export function clearAllData(database: SQLite.SQLiteDatabase = getDatabase()) {
@@ -192,6 +204,53 @@ export function getOccurrencesFromDb(dateStr: string): TaskOccurrence[] {
   });
 }
 
+export function getOccurrencesInRangeFromDb(startDateStr: string, endDateStr: string): TaskOccurrence[] {
+  const database = getDatabase();
+  const rawOccurrences = database.getAllSync<any>(
+    'SELECT * FROM occurrences WHERE scheduledDate >= ? AND scheduledDate <= ? ORDER BY scheduledDate ASC, scheduledStart ASC;',
+    [startDateStr, endDateStr]
+  );
+
+  const categories = getCategoriesFromDb();
+  const categoryMap = new Map(categories.map(c => [c.id, c]));
+
+  const tasks = database.getAllSync<any>('SELECT * FROM tasks;');
+  const taskMap = new Map(tasks.map(t => [t.id, t]));
+
+  return rawOccurrences.map(row => {
+    const rawTask = taskMap.get(row.taskId) || {};
+    const cat = categoryMap.get(rawTask.categoryId) || DEFAULT_CATEGORIES[0];
+
+    const task: Task = {
+      id: rawTask.id,
+      title: rawTask.title,
+      description: rawTask.description,
+      categoryId: rawTask.categoryId,
+      priority: rawTask.priority,
+      measurementType: rawTask.measurementType,
+      measurementConfig: JSON.parse(rawTask.measurementConfig || '{}'),
+      scheduledStart: rawTask.scheduledStart,
+      scheduledEnd: rawTask.scheduledEnd,
+      recurrence: rawTask.recurrence,
+      category: cat
+    };
+
+    return {
+      id: row.id,
+      taskId: row.taskId,
+      scheduledDate: row.scheduledDate,
+      scheduledStart: row.scheduledStart,
+      scheduledEnd: row.scheduledEnd,
+      status: row.status,
+      progressPercentage: row.progressPercentage,
+      actualData: JSON.parse(row.actualData || '{}'),
+      actualDisplay: row.actualDisplay,
+      completedAt: row.completedAt,
+      task
+    };
+  });
+}
+
 export function saveOccurrenceProgressInDb(
   occurrenceId: string,
   progressPercentage: number,
@@ -209,6 +268,43 @@ export function saveOccurrenceProgressInDb(
     [progressPercentage, JSON.stringify(actualData), actualDisplay, status, completedAt, occurrenceId]
   );
 }
+
+function addMinutesToTime(timeStr: string, mins: number): string {
+  const [h, m] = (timeStr || '00:00').split(':').map(Number);
+  const total = h * 60 + m + mins;
+  const wrapped = ((total % 1440) + 1440) % 1440;
+  const newH = Math.floor(wrapped / 60);
+  const newM = wrapped % 60;
+  return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
+}
+
+export function postponeOccurrenceInDb(occurrenceId: string, minutes: number) {
+  const database = getDatabase();
+  const occ = database.getFirstSync<any>('SELECT * FROM occurrences WHERE id = ?;', [occurrenceId]);
+  if (!occ) return;
+
+  const newStart = addMinutesToTime(occ.scheduledStart, minutes);
+  const newEnd = addMinutesToTime(occ.scheduledEnd, minutes);
+
+  database.runSync(
+    'UPDATE occurrences SET scheduledStart = ?, scheduledEnd = ? WHERE id = ?;',
+    [newStart, newEnd, occurrenceId]
+  );
+}
+
+export function extendOccurrenceInDb(occurrenceId: string, minutes: number) {
+  const database = getDatabase();
+  const occ = database.getFirstSync<any>('SELECT * FROM occurrences WHERE id = ?;', [occurrenceId]);
+  if (!occ) return;
+
+  const newEnd = addMinutesToTime(occ.scheduledEnd, minutes);
+
+  database.runSync(
+    'UPDATE occurrences SET scheduledEnd = ? WHERE id = ?;',
+    [newEnd, occurrenceId]
+  );
+}
+
 
 export function insertNewTaskInDb(task: Task, scheduledDate: string) {
   const database = getDatabase();
@@ -304,4 +400,20 @@ export function getSettingsFromDb(): AppSettings {
 export function updateSettingInDb(key: string, value: string) {
   const database = getDatabase();
   database.runSync('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?);', [key, value]);
+}
+
+export function getAppInstallDate(): string {
+  const database = getDatabase();
+  const row = database.getFirstSync<{ value: string }>(
+    "SELECT value FROM app_settings WHERE key = 'install_date';"
+  );
+  if (row?.value) {
+    return row.value;
+  }
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  database.runSync(
+    "INSERT OR REPLACE INTO app_settings (key, value) VALUES ('install_date', ?);",
+    [todayStr]
+  );
+  return todayStr;
 }

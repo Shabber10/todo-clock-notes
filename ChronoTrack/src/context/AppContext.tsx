@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { TaskOccurrence, Category, Goal, Habit, AppSettings } from '../types';
 import * as db from '../database/db';
+import { checkTaskAlarms, markAlarmTriggered, TaskAlarm } from '../services/alarmService';
 
 interface AppContextType {
   selectedDate: string;
@@ -22,6 +23,10 @@ interface AppContextType {
   setIsMonthCalendarOpen: (open: boolean) => void;
   refreshData: () => void;
   toggleHabit: (id: string) => void;
+  currentTimeMinutes: number;
+  activeAlarm: TaskAlarm | null;
+  triggerAlarm: (alarm: TaskAlarm | null) => void;
+  dismissAlarm: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -32,6 +37,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [categories, setCategories] = useState<Category[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
+  const [activeAlarm, setActiveAlarm] = useState<TaskAlarm | null>(null);
+  const [currentTimeMinutes, setCurrentTimeMinutes] = useState<number>(() => {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  });
   const [settings, setSettings] = useState<AppSettings>({
     theme: 'light',
     timeFormat: '12h',
@@ -43,6 +53,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState<boolean>(false);
   const [selectedOccurrenceForProgress, setSelectedOccurrenceForProgress] = useState<TaskOccurrence | null>(null);
   const [isMonthCalendarOpen, setIsMonthCalendarOpen] = useState<boolean>(false);
+
+  // Background alarm ticker comparing mobile real clock with scheduled tasks
+  useEffect(() => {
+    const checkNow = () => {
+      const now = new Date();
+      const currentMin = now.getHours() * 60 + now.getMinutes();
+      setCurrentTimeMinutes(prev => (prev !== currentMin ? currentMin : prev));
+
+      const triggered = checkTaskAlarms(occurrences);
+      if (triggered && !activeAlarm) {
+        setActiveAlarm(triggered);
+      }
+    };
+
+    checkNow();
+    const interval = setInterval(checkNow, 3000);
+    return () => clearInterval(interval);
+  }, [occurrences, activeAlarm]);
+
+  const triggerAlarm = (alarm: TaskAlarm | null) => {
+    setActiveAlarm(alarm);
+  };
+
+  const dismissAlarm = () => {
+    if (activeAlarm) {
+      markAlarmTriggered(activeAlarm.id);
+      setActiveAlarm(null);
+    }
+  };
+
 
   const refreshData = () => {
     try {
@@ -101,7 +141,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isMonthCalendarOpen,
         setIsMonthCalendarOpen,
         refreshData,
-        toggleHabit
+        toggleHabit,
+        currentTimeMinutes,
+        activeAlarm,
+        triggerAlarm,
+        dismissAlarm
       }}
     >
       {children}

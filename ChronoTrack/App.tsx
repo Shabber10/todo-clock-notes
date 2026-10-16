@@ -12,11 +12,14 @@ import { AddTaskModal } from './src/components/AddTaskModal';
 import { RecordProgressModal } from './src/components/RecordProgressModal';
 import { MonthCalendarModal } from './src/components/MonthCalendarModal';
 
+import { TaskAlarmModal } from './src/components/TaskAlarmModal';
+import { checkTaskAlarms, markAlarmTriggered, TaskAlarm } from './src/services/alarmService';
+
 // Suppress deprecation and minor dev warning banners on mobile view
 LogBox.ignoreAllLogs(true);
 
 const MainNavigator: React.FC = () => {
-  const { activeTab, settings, isAddTaskModalOpen, selectedOccurrenceForProgress } = useApp();
+  const { activeTab, settings, isAddTaskModalOpen, selectedOccurrenceForProgress, activeAlarm, dismissAlarm } = useApp();
   const isDark = settings.theme === 'dark';
   const isAnyModalOpen = isAddTaskModalOpen || Boolean(selectedOccurrenceForProgress);
 
@@ -41,15 +44,18 @@ const MainNavigator: React.FC = () => {
       </View>
 
       {/* Fixed Bottom Navigation */}
-      {!isAnyModalOpen && <BottomNavBar />}
+      {!isAnyModalOpen && !activeAlarm && <BottomNavBar />}
 
       {/* Interactive Modals */}
       <AddTaskModal />
       <RecordProgressModal />
       <MonthCalendarModal />
+      <TaskAlarmModal alarm={activeAlarm} onDismiss={dismissAlarm} />
     </View>
   );
 };
+
+
 
 export default function App() {
   return (

@@ -118,6 +118,44 @@ export interface DailyAnalytics {
   }[];
 }
 
+export interface TrendPoint {
+  day: string;
+  date?: string;
+  completed: number;
+  total: number;
+  rate: number;
+  isGrowing: boolean;
+  status: 'active' | 'before_start' | 'future';
+  isFuture: boolean;
+  isBeforeStart: boolean;
+}
+
+
+export interface PeriodAnalytics {
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  periodTitle: string;
+  totalDue: number;
+  completed: number;
+  inProgress: number;
+  upcoming: number;
+  missed: number;
+  completionRate: number;
+  targetAchievement: number;
+  plannedFocusDisplay: string;
+  actualFocusDisplay: string;
+  averageRate: number;
+  trend: TrendPoint[];
+  categoryDistribution: {
+    name: string;
+    count: number;
+    color: string;
+    percentage: number;
+    focusMinutes: number;
+  }[];
+  growthDirection: 'up' | 'down' | 'flat';
+  growthPercentage: number;
+}
+
 export interface WeeklyAnalytics {
   totalCompleted: number;
   totalDue: number;
