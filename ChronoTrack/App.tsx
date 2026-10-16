@@ -27,7 +27,7 @@ const MainNavigator: React.FC = () => {
     <View style={[styles.safeArea, isDark ? styles.darkBg : styles.lightBg]}>
       <StatusBar 
         barStyle={isDark ? "light-content" : "dark-content"} 
-        backgroundColor={isDark ? "#0F172A" : "#FFFFFF"}
+        backgroundColor={isDark ? "#080C16" : "#F4F7FB"}
         translucent={Platform.OS === 'android'}
       />
 
@@ -70,10 +70,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   lightBg: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F4F7FB',
   },
   darkBg: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#080C16',
   },
   screenContainer: {
     flex: 1,

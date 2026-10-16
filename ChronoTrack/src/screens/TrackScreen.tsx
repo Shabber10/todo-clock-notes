@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { calculatePeriodAnalytics } from '../services/analyticsService';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Defs, LinearGradient, Stop, Circle, Line, Text as SvgText } from 'react-native-svg';
+import { Palette } from '../theme/colors';
 
 export const TrackScreen: React.FC = () => {
   const { selectedDate, settings } = useApp();
@@ -422,31 +423,41 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   lightBg: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Palette.canvas.light,
   },
   darkBg: {
-    backgroundColor: '#0F172A',
+    backgroundColor: Palette.canvas.dark,
   },
   periodBar: {
     flexDirection: 'row',
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 4,
     marginBottom: 16,
+    borderWidth: 1,
   },
   lightPeriodBar: {
-    backgroundColor: '#EEF2F6',
+    backgroundColor: Palette.glass.light,
+    borderColor: Palette.glass.lightBorder,
   },
   darkPeriodBar: {
-    backgroundColor: '#1E293B',
+    backgroundColor: Palette.glass.dark,
+    borderColor: Palette.glass.darkBorder,
   },
   periodTab: {
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: 12,
   },
   periodTabActive: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#1E3A8A',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 240, 255, 0.4)',
+    shadowColor: Palette.neon.cyan,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 4,
   },
   periodText: {
     fontSize: 12,
@@ -464,9 +475,27 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     width: '48%',
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 14,
-    borderWidth: 1,
+    borderWidth: 1.5,
+  },
+  lightMetricCard: {
+    backgroundColor: Palette.glass.light,
+    borderColor: Palette.glass.lightBorder,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  darkMetricCard: {
+    backgroundColor: Palette.glass.dark,
+    borderColor: Palette.glass.darkBorder,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   metricLabel: {
     fontSize: 11,
@@ -490,10 +519,28 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sectionCard: {
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 16,
-    borderWidth: 1,
+    borderWidth: 1.5,
     marginBottom: 14,
+  },
+  lightSectionCard: {
+    backgroundColor: Palette.glass.light,
+    borderColor: Palette.glass.lightBorder,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  darkSectionCard: {
+    backgroundColor: Palette.glass.dark,
+    borderColor: Palette.glass.darkBorder,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 6,
   },
   sectionTitleRow: {
     flexDirection: 'row',
@@ -688,12 +735,24 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   lightCard: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#F1F5F9',
+    backgroundColor: Palette.glass.light,
+    borderColor: Palette.glass.lightBorder,
+    borderWidth: 1.5,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
   darkCard: {
-    backgroundColor: '#1E293B',
-    borderColor: '#334155',
+    backgroundColor: Palette.glass.dark,
+    borderColor: Palette.glass.darkBorder,
+    borderWidth: 1.5,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 5,
   },
   lightText: {
     color: '#0F172A',
