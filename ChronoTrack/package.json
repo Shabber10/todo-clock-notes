@@ -1,11 +1,12 @@
 {
-  "name": "chronotrack",
-  "version": "1.0.0",
+  "name": "consistrack",
+  "version": "2.0.0",
   "main": "index.ts",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
     "date-fns": "^4.4.0",
     "expo": "~57.0.29",
+    "expo-document-picker": "~57.0.3",
     "expo-sqlite": "~57.0.4",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",

@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Platform, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { format, parseISO, subDays, addDays } from 'date-fns';
+import { Palette } from '../theme/colors';
 
 export const Header: React.FC = () => {
   const { selectedDate, setSelectedDate, settings, setIsMonthCalendarOpen } = useApp();
@@ -20,13 +21,16 @@ export const Header: React.FC = () => {
 
   return (
     <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
+      {/* Top Specular Edge Line */}
+      <View style={[styles.specularLine, isDark ? styles.darkSpecular : styles.lightSpecular]} />
+
       {/* Brand Logo & Name */}
       <View style={styles.brandRow}>
-        <View style={styles.logoCircle}>
-          <Ionicons name="time" size={20} color="#FFFFFF" />
+        <View style={[styles.logoCircle, isDark ? styles.darkLogoGlow : styles.lightLogoGlow]}>
+          <Ionicons name="time" size={18} color="#FFFFFF" />
         </View>
         <Text style={[styles.brandText, isDark ? styles.darkText : styles.lightText]}>
-          ChronoTrack
+          Consis<Text style={{ color: Palette.neon.cyan }}>Track</Text>
         </Text>
       </View>
 
@@ -52,7 +56,7 @@ export const Header: React.FC = () => {
           <Text style={[styles.monthText, isDark ? styles.darkText : styles.lightText]}>
             {formattedMonthYear}
           </Text>
-          <Ionicons name="calendar-outline" size={14} color="#2563EB" style={{ marginLeft: 4 }} />
+          <Ionicons name="calendar-outline" size={14} color={isDark ? Palette.neon.cyan : "#2563EB"} style={{ marginLeft: 4 }} />
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -74,62 +78,111 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingTop: Platform.OS === 'android' ? Math.max((StatusBar.currentHeight || 0) + 6, 42) : 10,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
+    paddingBottom: 10,
+    borderBottomWidth: 1.5,
+    position: 'relative',
   },
   lightContainer: {
-    backgroundColor: '#FFFFFF',
-    borderBottomColor: '#F1F5F9',
+    backgroundColor: Palette.glass.light,
+    borderBottomColor: Palette.glass.lightBorder,
   },
   darkContainer: {
-    backgroundColor: '#0F172A',
-    borderBottomColor: '#1E293B',
+    backgroundColor: Palette.glass.dark,
+    borderBottomColor: Palette.glass.darkBorder,
+  },
+  specularLine: {
+    position: 'absolute',
+    top: 0,
+    left: 20,
+    right: 20,
+    height: 1,
+  },
+  lightSpecular: {
+    backgroundColor: Palette.glass.lightBorderSpecular,
+  },
+  darkSpecular: {
+    backgroundColor: Palette.glass.darkBorderSpecular,
   },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   logoCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: '#2563EB',
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#1E3A8A',
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 240, 255, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  darkLogoGlow: {
+    shadowColor: Palette.neon.cyan,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  lightLogoGlow: {
+    backgroundColor: '#2563EB',
+    borderColor: '#93C5FD',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
   brandText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '800',
     letterSpacing: -0.4,
   },
   navRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
   },
   monthButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
   },
   lightPill: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Palette.clay.light.bg,
+    borderColor: '#E2E8F0',
   },
   darkPill: {
-    backgroundColor: '#1E293B',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   monthText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   iconButton: {
     padding: 5,
     borderRadius: 8,
+  },
+  themeToggleBtn: {
+    padding: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginLeft: 4,
+  },
+  lightThemeBtn: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
+  },
+  darkThemeBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   lightText: {
     color: '#0F172A',

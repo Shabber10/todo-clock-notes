@@ -8,8 +8,7 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
-  Alert,
-  Switch
+  Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
@@ -34,17 +33,6 @@ const WEEK_DAYS: DayOption[] = [
   { key: 'sat', label: 'S', dayIndex: 6, fullName: 'Saturday' },
 ];
 
-const ALARM_SOUNDS = [
-  'Default (Gentle Chime)',
-  'Digital Beep',
-  'Morning Sunbird',
-  'Zen Temple Bell',
-  'Radar Alert',
-  'Energetic Wave',
-];
-
-const SNOOZE_OPTIONS = [5, 10, 15, 20, 30];
-
 export const AddTaskModal: React.FC = () => {
   const { isAddTaskModalOpen, setIsAddTaskModalOpen, selectedDate, setSelectedDate, categories, settings, refreshData } = useApp();
   const isDark = settings.theme === 'dark';
@@ -67,13 +55,6 @@ export const AddTaskModal: React.FC = () => {
   // Repeat / Days of week state (all unselected by default)
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
-  // Alarm & Sound state (from user's image)
-  const [isAlarmEnabled, setIsAlarmEnabled] = useState(true);
-  const [pauseAlarmMins, setPauseAlarmMins] = useState(10);
-  const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
-  const [alarmSound, setAlarmSound] = useState('Default (Gentle Chime)');
-  const [isSoundModalOpen, setIsSoundModalOpen] = useState(false);
-  const [isVibrateEnabled, setIsVibrateEnabled] = useState(true);
 
   // Time Picker Modal State
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
@@ -142,7 +123,6 @@ export const AddTaskModal: React.FC = () => {
     setUnit('');
     setPlannedMinutes('');
     setSelectedDays([]);
-    setIsAlarmEnabled(true);
   };
 
   useEffect(() => {
@@ -508,84 +488,6 @@ export const AddTaskModal: React.FC = () => {
               })}
             </View>
 
-            {/* Alarm & Sound Card (Matching user's reference image) */}
-            <View style={[styles.alarmControlCard, isDark ? styles.darkAlarmCard : styles.lightAlarmCard]}>
-              {/* Alarm Schedule & Toggle */}
-              <View style={styles.alarmRow}>
-                <View style={styles.alarmRowLeft}>
-                  <Ionicons name="alarm-outline" size={20} color="#0D9488" />
-                  <Text style={[styles.alarmLabel, isDark ? styles.darkText : styles.lightText]}>
-                    {isAlarmEnabled ? 'Alarm is on' : 'Alarm is off'}
-                  </Text>
-                </View>
-                <Switch
-                  testID="switch-alarm-toggle"
-                  accessibilityLabel="Toggle Alarm On or Off"
-                  value={isAlarmEnabled}
-                  onValueChange={setIsAlarmEnabled}
-                  trackColor={{ false: '#64748B', true: '#0D9488' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-
-              {/* Pause Alarm (Snooze) */}
-              <TouchableOpacity
-                testID="btn-pause-alarm"
-                accessibilityLabel={`Pause alarm snooze: ${pauseAlarmMins} minutes. Tap to change.`}
-                accessibilityRole="button"
-                onPress={() => setIsPauseModalOpen(true)}
-                style={styles.alarmOptionRow}
-              >
-                <View style={styles.alarmRowLeft}>
-                  <Ionicons name="time-outline" size={18} color={isDark ? '#94A3B8' : '#64748B'} />
-                  <Text style={[styles.alarmOptionText, isDark ? styles.darkText : styles.lightText]}>
-                    Pause alarm (Snooze)
-                  </Text>
-                </View>
-                <View style={styles.alarmOptionRight}>
-                  <Text style={styles.alarmOptionValue}>{pauseAlarmMins} mins</Text>
-                  <Ionicons name="chevron-forward" size={16} color={isDark ? '#94A3B8' : '#64748B'} />
-                </View>
-              </TouchableOpacity>
-
-              {/* Alarm Sound Selector */}
-              <TouchableOpacity
-                testID="btn-sound-select"
-                accessibilityLabel={`Alarm sound: ${alarmSound}. Tap to change sound.`}
-                accessibilityRole="button"
-                onPress={() => setIsSoundModalOpen(true)}
-                style={styles.alarmOptionRow}
-              >
-                <View style={styles.alarmRowLeft}>
-                  <Ionicons name="notifications-outline" size={18} color={isDark ? '#94A3B8' : '#64748B'} />
-                  <Text style={[styles.alarmOptionText, isDark ? styles.darkText : styles.lightText]}>
-                    Sound
-                  </Text>
-                </View>
-                <View style={styles.alarmOptionRight}>
-                  <Text style={styles.alarmOptionValue} numberOfLines={1}>{alarmSound}</Text>
-                  <Ionicons name="chevron-forward" size={16} color={isDark ? '#94A3B8' : '#64748B'} />
-                </View>
-              </TouchableOpacity>
-
-              {/* Vibrate Toggle */}
-              <View style={[styles.alarmOptionRow, { borderBottomWidth: 0 }]}>
-                <View style={styles.alarmRowLeft}>
-                  <Ionicons name="phone-portrait-outline" size={18} color={isDark ? '#94A3B8' : '#64748B'} />
-                  <Text style={[styles.alarmOptionText, isDark ? styles.darkText : styles.lightText]}>
-                    Vibrate
-                  </Text>
-                </View>
-                <Switch
-                  testID="switch-vibrate-toggle"
-                  accessibilityLabel="Toggle Vibrate"
-                  value={isVibrateEnabled}
-                  onValueChange={setIsVibrateEnabled}
-                  trackColor={{ false: '#64748B', true: '#0D9488' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-            </View>
 
             {/* Bottom Action Buttons: Delete and Save (Matching user's image) */}
             <View style={styles.bottomActionsRow}>
@@ -698,105 +600,6 @@ export const AddTaskModal: React.FC = () => {
         }}
       />
 
-      {/* POPUP MODAL 3: Alarm Sound Picker */}
-      <Modal
-        visible={isSoundModalOpen}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsSoundModalOpen(false)}
-      >
-        <TouchableOpacity
-          style={styles.popupOverlay}
-          activeOpacity={1}
-          onPress={() => setIsSoundModalOpen(false)}
-        >
-          <View style={[styles.popupCard, isDark ? styles.darkSheet : styles.lightSheet]}>
-            <View style={styles.popupHeader}>
-              <Text style={[styles.popupTitle, isDark ? styles.darkText : styles.lightText]}>
-                Alarm Sound
-              </Text>
-              <TouchableOpacity onPress={() => setIsSoundModalOpen(false)}>
-                <Ionicons name="close" size={22} color={isDark ? '#94A3B8' : '#64748B'} />
-              </TouchableOpacity>
-            </View>
-
-            {ALARM_SOUNDS.map((snd) => {
-              const isSelected = alarmSound === snd;
-              return (
-                <TouchableOpacity
-                  key={snd}
-                  onPress={() => {
-                    setAlarmSound(snd);
-                    setIsSoundModalOpen(false);
-                  }}
-                  style={[styles.popupItem, isSelected && (isDark ? styles.popupItemSelectedDark : styles.popupItemSelectedLight)]}
-                >
-                  <View style={styles.popupItemLeft}>
-                    <Ionicons
-                      name="musical-note-outline"
-                      size={18}
-                      color={isSelected ? '#0D9488' : (isDark ? '#94A3B8' : '#64748B')}
-                      style={{ marginRight: 10 }}
-                    />
-                    <Text style={[styles.popupItemText, isSelected ? styles.popupItemTextActive : (isDark ? styles.darkText : styles.lightText)]}>
-                      {snd}
-                    </Text>
-                  </View>
-                  {isSelected && (
-                    <Ionicons name="checkmark-circle" size={18} color="#0D9488" />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* POPUP MODAL 4: Pause / Snooze Picker */}
-      <Modal
-        visible={isPauseModalOpen}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsPauseModalOpen(false)}
-      >
-        <TouchableOpacity
-          style={styles.popupOverlay}
-          activeOpacity={1}
-          onPress={() => setIsPauseModalOpen(false)}
-        >
-          <View style={[styles.popupCard, isDark ? styles.darkSheet : styles.lightSheet]}>
-            <View style={styles.popupHeader}>
-              <Text style={[styles.popupTitle, isDark ? styles.darkText : styles.lightText]}>
-                Pause Alarm (Snooze Duration)
-              </Text>
-              <TouchableOpacity onPress={() => setIsPauseModalOpen(false)}>
-                <Ionicons name="close" size={22} color={isDark ? '#94A3B8' : '#64748B'} />
-              </TouchableOpacity>
-            </View>
-
-            {SNOOZE_OPTIONS.map((mins) => {
-              const isSelected = pauseAlarmMins === mins;
-              return (
-                <TouchableOpacity
-                  key={mins}
-                  onPress={() => {
-                    setPauseAlarmMins(mins);
-                    setIsPauseModalOpen(false);
-                  }}
-                  style={[styles.popupItem, isSelected && (isDark ? styles.popupItemSelectedDark : styles.popupItemSelectedLight)]}
-                >
-                  <Text style={[styles.popupItemText, isSelected ? styles.popupItemTextActive : (isDark ? styles.darkText : styles.lightText)]}>
-                    {mins} minutes
-                  </Text>
-                  {isSelected && (
-                    <Ionicons name="checkmark-circle" size={18} color="#0D9488" />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </TouchableOpacity>
-      </Modal>
     </Modal>
   );
 };

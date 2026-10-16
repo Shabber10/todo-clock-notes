@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { Ionicons } from '@expo/vector-icons';
+import { Palette } from '../theme/colors';
+import { ClayButton } from '../components/ClayButton';
 
 export const HabitsScreen: React.FC = () => {
   const { habits, settings, toggleHabit } = useApp();
@@ -39,32 +41,31 @@ export const HabitsScreen: React.FC = () => {
                 <Text style={styles.habitMeta}>
                   {habit.frequency} • {habit.target}
                 </Text>
-                <View style={styles.streakBadge}>
-                  <Ionicons name="flame" size={14} color="#EA580C" />
-                  <Text style={styles.streakText}>
+                <View style={[styles.streakBadge, isDark ? styles.darkStreakBadge : styles.lightStreakBadge]}>
+                  <Ionicons name="flame" size={14} color={Palette.neon.amberBright} />
+                  <Text style={[styles.streakText, { color: Palette.neon.amberBright }]}>
                     {habit.streakCount} day streak
                   </Text>
                 </View>
               </View>
 
-              {/* Checkmark Button */}
-              <TouchableOpacity
+              {/* 3D Tactile Clay Checkmark Button */}
+              <ClayButton
                 testID={`btn-habit-toggle-${habit.id}`}
                 accessibilityLabel={`Toggle habit ${habit.title}, currently ${habit.completedToday ? 'completed' : 'incomplete'}`}
-                accessibilityRole="button"
-                accessibilityState={{ selected: habit.completedToday }}
                 onPress={() => toggleHabit(habit.id)}
-                style={[
-                  styles.checkBtn,
-                  habit.completedToday ? styles.checkBtnDone : (isDark ? styles.darkCheckBtn : styles.lightCheckBtn)
-                ]}
+                isDark={isDark}
+                variant={habit.completedToday ? 'success' : 'secondary'}
+                glowColor={habit.completedToday ? Palette.neon.emeraldGlow : undefined}
+                borderRadius={22}
+                style={styles.clayCheckBtn}
               >
                 <Ionicons
                   name={habit.completedToday ? "checkmark" : "ellipse-outline"}
-                  size={24}
-                  color={habit.completedToday ? "#FFFFFF" : (isDark ? "#64748B" : "#CBD5E1")}
+                  size={22}
+                  color={habit.completedToday ? "#FFFFFF" : (isDark ? "#94A3B8" : "#64748B")}
                 />
-              </TouchableOpacity>
+              </ClayButton>
             </View>
           );
         })
@@ -80,10 +81,10 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   lightBg: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Palette.canvas.light,
   },
   darkBg: {
-    backgroundColor: '#0F172A',
+    backgroundColor: Palette.canvas.dark,
   },
   header: {
     marginBottom: 16,
@@ -102,17 +103,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    marginBottom: 10,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    marginBottom: 12,
   },
   lightCard: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#F1F5F9',
+    backgroundColor: Palette.glass.light,
+    borderColor: Palette.glass.lightBorder,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 2,
   },
   darkCard: {
-    backgroundColor: '#1E293B',
-    borderColor: '#334155',
+    backgroundColor: Palette.glass.dark,
+    borderColor: Palette.glass.darkBorder,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 4,
   },
   infoCol: {
     flex: 1,
@@ -131,28 +142,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  lightStreakBadge: {
+    backgroundColor: '#FEF3C7',
+  },
+  darkStreakBadge: {
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.25)',
   },
   streakText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#EA580C',
   },
-  checkBtn: {
+  clayCheckBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
-  },
-  checkBtnDone: {
-    backgroundColor: '#10B981',
-  },
-  lightCheckBtn: {
-    backgroundColor: '#F1F5F9',
-  },
-  darkCheckBtn: {
-    backgroundColor: '#334155',
   },
   lightText: {
     color: '#0F172A',

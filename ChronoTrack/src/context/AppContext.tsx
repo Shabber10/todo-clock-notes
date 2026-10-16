@@ -4,6 +4,8 @@ import { TaskOccurrence, Category, Goal, Habit, AppSettings } from '../types';
 import * as db from '../database/db';
 import { checkTaskAlarms, markAlarmTriggered, TaskAlarm } from '../services/alarmService';
 
+export type NavTab = 'today' | 'track' | 'goals' | 'habits' | 'profile' | 'settings';
+
 interface AppContextType {
   selectedDate: string;
   setSelectedDate: (date: string) => void;
@@ -12,9 +14,10 @@ interface AppContextType {
   goals: Goal[];
   habits: Habit[];
   settings: AppSettings;
-  activeTab: 'today' | 'track' | 'goals' | 'habits' | 'profile';
-  setActiveTab: (tab: 'today' | 'track' | 'goals' | 'habits' | 'profile') => void;
+  activeTab: NavTab;
+  setActiveTab: (tab: NavTab) => void;
   toggleTheme: () => void;
+  updateSetting: (key: keyof AppSettings, value: any) => void;
   isAddTaskModalOpen: boolean;
   setIsAddTaskModalOpen: (open: boolean) => void;
   selectedOccurrenceForProgress: TaskOccurrence | null;
@@ -42,14 +45,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const d = new Date();
     return d.getHours() * 60 + d.getMinutes();
   });
-  const [settings, setSettings] = useState<AppSettings>({
-    theme: 'light',
-    timeFormat: '12h',
-    userName: 'User',
-    userEmail: '',
-    defaultReminderMins: 15
-  });
-  const [activeTab, setActiveTab] = useState<'today' | 'track' | 'goals' | 'habits' | 'profile'>('today');
+  const [settings, setSettings] = useState<AppSettings>(() => db.getSettingsFromDb());
+  const [activeTab, setActiveTab] = useState<NavTab>('today');
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState<boolean>(false);
   const [selectedOccurrenceForProgress, setSelectedOccurrenceForProgress] = useState<TaskOccurrence | null>(null);
   const [isMonthCalendarOpen, setIsMonthCalendarOpen] = useState<boolean>(false);
@@ -116,6 +113,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSettings(prev => ({ ...prev, theme: nextTheme }));
   };
 
+  const updateSetting = (key: keyof AppSettings, value: any) => {
+    const strVal = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    db.updateSettingInDb(key, strVal);
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
   const toggleHabit = (id: string) => {
     db.toggleHabitInDb(id);
     setHabits(db.getHabitsFromDb());
@@ -134,6 +137,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activeTab,
         setActiveTab,
         toggleTheme,
+        updateSetting,
         isAddTaskModalOpen,
         setIsAddTaskModalOpen,
         selectedOccurrenceForProgress,

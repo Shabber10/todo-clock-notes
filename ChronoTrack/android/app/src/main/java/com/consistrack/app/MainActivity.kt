@@ -1,4 +1,4 @@
-package com.chronotrack.app
+package com.consistrack.app
 
 import android.os.Build
 import android.os.Bundle

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "ChronoTrack",
-    "slug": "ChronoTrack",
-    "version": "1.0.0",
+    "name": "ConsisTrack",
+    "slug": "ConsisTrack",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -10,7 +10,8 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.chronotrack.app",
+      "package": "com.consistrack.app",
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",

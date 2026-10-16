@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { Ionicons } from '@expo/vector-icons';
+import { Palette } from '../theme/colors';
 
 export const GoalsScreen: React.FC = () => {
   const { goals, settings } = useApp();
@@ -100,31 +101,41 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   lightBg: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Palette.canvas.light,
   },
   darkBg: {
-    backgroundColor: '#0F172A',
+    backgroundColor: Palette.canvas.dark,
   },
   tabBar: {
     flexDirection: 'row',
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 4,
     marginBottom: 16,
+    borderWidth: 1,
   },
   lightTabBar: {
-    backgroundColor: '#EEF2F6',
+    backgroundColor: Palette.glass.light,
+    borderColor: Palette.glass.lightBorder,
   },
   darkTabBar: {
-    backgroundColor: '#1E293B',
+    backgroundColor: Palette.glass.dark,
+    borderColor: Palette.glass.darkBorder,
   },
   tab: {
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: 12,
   },
   tabActive: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#1E3A8A',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 240, 255, 0.4)',
+    shadowColor: Palette.neon.cyan,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 4,
   },
   tabText: {
     fontSize: 12,
@@ -135,18 +146,28 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   card: {
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    marginBottom: 12,
+    borderWidth: 1.5,
+    marginBottom: 14,
   },
   lightCard: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#F1F5F9',
+    backgroundColor: Palette.glass.light,
+    borderColor: Palette.glass.lightBorder,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 2,
   },
   darkCard: {
-    backgroundColor: '#1E293B',
-    borderColor: '#334155',
+    backgroundColor: Palette.glass.dark,
+    borderColor: Palette.glass.darkBorder,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 5,
   },
   headerRow: {
     flexDirection: 'row',

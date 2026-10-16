@@ -1,5 +1,5 @@
 /**
- * ChronoTrack Mobile UI Automator & Locator Test Runner
+ * ConsisTrack Mobile UI Automator & Locator Test Runner
  * 
  * Allows finding and tapping buttons by React Native `testID` or `accessibilityLabel` (content-desc)
  * without hardcoding screen coordinates.

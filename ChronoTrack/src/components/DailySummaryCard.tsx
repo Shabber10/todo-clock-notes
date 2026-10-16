@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useApp } from '../context/AppContext';
-import { Ionicons } from '@expo/vector-icons';
+import { Palette } from '../theme/colors';
 
 export const DailySummaryCard: React.FC = () => {
   const { occurrences, settings } = useApp();
@@ -42,8 +42,8 @@ export const DailySummaryCard: React.FC = () => {
   const actualFocusDisplay = `${Math.floor(actualMinutes / 60)}h ${actualMinutes % 60}m`;
 
   // SVG Circular progress math
-  const size = 68;
-  const strokeWidth = 6;
+  const size = 72;
+  const strokeWidth = 7;
   const center = size / 2;
   const radius = center - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
@@ -55,13 +55,22 @@ export const DailySummaryCard: React.FC = () => {
       accessibilityLabel={`Daily summary, ${completed} of ${total} tasks completed, ${completionRate}% progress`}
       style={[styles.card, isDark ? styles.darkCard : styles.lightCard]}
     >
+      {/* Top Specular Glass Highlight */}
+      <View style={[styles.specularLine, isDark ? styles.darkSpecular : styles.lightSpecular]} />
+
       {/* Top Banner Row */}
       <View style={styles.contentRow}>
-        {/* Circular Progress Ring */}
-        <View style={styles.circleWrapper}>
+        {/* Glowing Circular Progress Ring */}
+        <View style={[styles.circleWrapper, completionRate > 0 && styles.ringGlow]}>
           <Svg width={size} height={size}>
+            <Defs>
+              <LinearGradient id="summaryRingGrad" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0%" stopColor={Palette.neon.cyan} />
+                <Stop offset="100%" stopColor={Palette.neon.emeraldBright} />
+              </LinearGradient>
+            </Defs>
             <Circle
-              stroke={isDark ? '#334155' : '#E2E8F0'}
+              stroke={isDark ? 'rgba(51, 65, 85, 0.45)' : '#E2E8F0'}
               fill="none"
               cx={center}
               cy={center}
@@ -69,7 +78,7 @@ export const DailySummaryCard: React.FC = () => {
               strokeWidth={strokeWidth}
             />
             <Circle
-              stroke="#10B981"
+              stroke="url(#summaryRingGrad)"
               fill="none"
               cx={center}
               cy={center}
@@ -91,27 +100,47 @@ export const DailySummaryCard: React.FC = () => {
 
         {/* Task Completion Text */}
         <View style={styles.textColumn}>
-          <Text style={[styles.taskCountText, isDark ? styles.darkText : styles.lightText]}>
-            {completed} of {total} tasks completed
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={[styles.taskCountText, isDark ? styles.darkText : styles.lightText]}>
+              {completed} of {total} tasks completed
+            </Text>
+            {completionRate === 100 && total > 0 && (
+              <View style={styles.allDoneBadge}>
+                <Text style={styles.allDoneText}>All Done! 🎉</Text>
+              </View>
+            )}
+          </View>
           
-          {/* Progress bar */}
+          {/* Glowing Progress bar */}
           <View style={[styles.progressBarBackground, isDark ? styles.darkBarBg : styles.lightBarBg]}>
-            <View style={[styles.progressBarFill, { width: `${completionRate}%` }]} />
+            <View 
+              style={[
+                styles.progressBarFill, 
+                { 
+                  width: `${completionRate}%`,
+                  backgroundColor: Palette.neon.emeraldBright,
+                  shadowColor: Palette.neon.emerald,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.8,
+                  shadowRadius: 6,
+                  elevation: 4,
+                }
+              ]} 
+            />
           </View>
 
           {/* Time Focus Stats */}
           <View style={styles.statsRow}>
-            <View>
+            <View style={styles.statBox}>
               <Text style={styles.statLabel}>Planned focus</Text>
-              <Text style={[styles.statValue, isDark ? styles.darkText : styles.lightText]}>
+              <Text style={[styles.statValue, isDark ? { color: Palette.neon.cyan } : styles.lightText]}>
                 {plannedFocusDisplay}
               </Text>
             </View>
 
-            <View style={{ marginLeft: 24 }}>
+            <View style={[styles.statBox, { marginLeft: 20 }]}>
               <Text style={styles.statLabel}>Actual focus</Text>
-              <Text style={[styles.statValue, isDark ? styles.darkText : styles.lightText]}>
+              <Text style={[styles.statValue, isDark ? { color: Palette.neon.emeraldBright } : styles.lightText]}>
                 {actualFocusDisplay}
               </Text>
             </View>
@@ -124,26 +153,45 @@ export const DailySummaryCard: React.FC = () => {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 22,
+    padding: 18,
     marginHorizontal: 16,
     marginTop: 14,
     marginBottom: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    overflow: 'hidden',
   },
   lightCard: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
+    backgroundColor: Palette.glass.light,
+    borderWidth: 1.5,
+    borderColor: Palette.glass.lightBorder,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 4,
   },
   darkCard: {
-    backgroundColor: '#1E293B',
-    borderWidth: 1,
-    borderColor: '#334155',
+    backgroundColor: Palette.glass.dark,
+    borderWidth: 1.5,
+    borderColor: Palette.glass.darkBorder,
+    shadowColor: '#00F0FF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  specularLine: {
+    position: 'absolute',
+    top: 0,
+    left: 20,
+    right: 20,
+    height: 1,
+  },
+  lightSpecular: {
+    backgroundColor: Palette.glass.lightBorderSpecular,
+  },
+  darkSpecular: {
+    backgroundColor: Palette.glass.darkBorderSpecular,
   },
   contentRow: {
     flexDirection: 'row',
@@ -198,10 +246,33 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     fontWeight: '500',
   },
+  statBox: {
+    paddingVertical: 2,
+  },
   statValue: {
     fontSize: 13,
     fontWeight: '700',
     marginTop: 1,
+  },
+  ringGlow: {
+    shadowColor: Palette.neon.cyan,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  allDoneBadge: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  allDoneText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Palette.neon.emeraldBright,
   },
   lightText: {
     color: '#0F172A',

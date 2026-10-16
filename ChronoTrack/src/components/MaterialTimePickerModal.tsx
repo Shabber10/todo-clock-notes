@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
+import { Palette } from '../theme/colors';
+import { ClayButton } from './ClayButton';
 
 interface MaterialTimePickerModalProps {
   visible: boolean;
@@ -148,11 +150,11 @@ export const MaterialTimePickerModal: React.FC<MaterialTimePickerModalProps> = (
   };
 
   // Color tokens
-  const primaryColor = isDark ? '#38BDF8' : '#2563EB';
-  const primaryBg = isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.12)';
-  const dialBg = isDark ? '#0F172A' : '#F1F5F9';
-  const inactiveBoxBg = isDark ? '#334155' : '#E2E8F0';
-  const activeBoxBg = isDark ? 'rgba(56, 189, 248, 0.2)' : '#EFF6FF';
+  const primaryColor = isDark ? Palette.neon.cyan : '#2563EB';
+  const primaryBg = isDark ? 'rgba(0, 240, 255, 0.15)' : 'rgba(37, 99, 235, 0.12)';
+  const dialBg = isDark ? 'rgba(8, 14, 26, 0.95)' : '#F1F5F9';
+  const inactiveBoxBg = isDark ? 'rgba(255, 255, 255, 0.08)' : '#E2E8F0';
+  const activeBoxBg = isDark ? 'rgba(0, 240, 255, 0.18)' : '#EFF6FF';
   const activeBorderColor = primaryColor;
   const textColor = isDark ? '#F8FAFC' : '#0F172A';
   const subTextColor = isDark ? '#94A3B8' : '#64748B';
@@ -521,10 +523,24 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
   },
   lightCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Palette.glass.lightElevated,
+    borderWidth: 1.5,
+    borderColor: Palette.glass.lightBorderSpecular,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 8,
   },
   darkCard: {
-    backgroundColor: '#1E293B',
+    backgroundColor: Palette.glass.darkElevated,
+    borderWidth: 1.5,
+    borderColor: Palette.glass.darkBorderSpecular,
+    shadowColor: Palette.neon.cyan,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 12,
   },
   headerTitle: {
     fontSize: 14,

@@ -1,4 +1,4 @@
-package com.chronotrack.app
+package com.consistrack.app
 
 import android.app.Application
 import android.content.res.Configuration

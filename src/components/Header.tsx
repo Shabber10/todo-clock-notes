@@ -53,7 +53,7 @@ export const Header: React.FC = () => {
           </div>
           <div>
             <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-1.5">
-              ChronoTrack
+              ConsisTrack
             </span>
           </div>
         </div>

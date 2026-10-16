@@ -14,9 +14,15 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat_5', name: 'Habits', color: '#EC4899', icon: 'repeat' }
 ];
 
+let isDbInitialized = false;
+
 export function getDatabase(): SQLite.SQLiteDatabase {
   if (!db) {
-    db = SQLite.openDatabaseSync('chronotrack.db');
+    db = SQLite.openDatabaseSync('consistrack.db');
+    if (!isDbInitialized) {
+      isDbInitialized = true;
+      initDatabase();
+    }
   }
   return db;
 }
@@ -411,7 +417,12 @@ export function toggleHabitInDb(id: string) {
 
 export function getSettingsFromDb(): AppSettings {
   const database = getDatabase();
-  const rows = database.getAllSync<{ key: string; value: string }>('SELECT * FROM app_settings;');
+  let rows: { key: string; value: string }[] = [];
+  try {
+    rows = database.getAllSync<{ key: string; value: string }>('SELECT * FROM app_settings;');
+  } catch (err) {
+    console.warn('app_settings table query fallback:', err);
+  }
   const map = new Map(rows.map(r => [r.key, r.value]));
 
   return {
@@ -419,8 +430,26 @@ export function getSettingsFromDb(): AppSettings {
     timeFormat: (map.get('timeFormat') as '12h' | '24h') || '12h',
     userName: map.get('userName') || 'User',
     userEmail: map.get('userEmail') || '',
-    defaultReminderMins: parseInt(map.get('defaultReminderMins') || '15', 10)
+    defaultReminderMins: parseInt(map.get('defaultReminderMins') || '15', 10),
+    alarmEnabled: map.get('alarmEnabled') !== 'false',
+    pauseAlarmMins: parseInt(map.get('pauseAlarmMins') || '10', 10),
+    alarmSound: map.get('alarmSound') || 'Default (Gentle Chime)',
+    alarmSoundUri: map.get('alarmSoundUri') || '',
+    vibrateEnabled: map.get('vibrateEnabled') !== 'false',
+    firstDayOfWeek: (map.get('firstDayOfWeek') as 'Monday' | 'Sunday') || 'Monday',
+    defaultTaskDuration: parseInt(map.get('defaultTaskDuration') || '60', 10),
+    preStartAlarmEnabled: map.get('preStartAlarmEnabled') !== 'false',
+    startAlarmEnabled: map.get('startAlarmEnabled') !== 'false',
+    wrapUpAlarmEnabled: map.get('wrapUpAlarmEnabled') !== 'false',
+    hapticFeedback: map.get('hapticFeedback') !== 'false',
+    completionSound: map.get('completionSound') !== 'false',
+    autoRollForward: map.get('autoRollForward') === 'true',
   };
+}
+
+export function clearCompletedOccurrencesFromDb() {
+  const database = getDatabase();
+  database.runSync("DELETE FROM occurrences WHERE status = 'completed';");
 }
 
 export function updateSettingInDb(key: string, value: string) {

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { format, addDays, subDays, startOfWeek, isSameDay, parseISO } from 'date-fns';
 import { useApp } from '../context/AppContext';
+import { Palette } from '../theme/colors';
 
 export const CalendarStrip: React.FC = () => {
   const { selectedDate, setSelectedDate, settings } = useApp();
@@ -22,6 +23,9 @@ export const CalendarStrip: React.FC = () => {
 
   return (
     <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
+      {/* Top Specular Edge Line */}
+      <View style={[styles.specularLine, isDark ? styles.darkSpecular : styles.lightSpecular]} />
+
       <TouchableOpacity 
         testID="btn-prev-week"
         accessibilityLabel="Previous Week"
@@ -48,8 +52,7 @@ export const CalendarStrip: React.FC = () => {
               onPress={() => setSelectedDate(dateStr)}
               style={[
                 styles.dayCard,
-                isSelected && styles.selectedDayCard,
-                !isSelected && (isDark ? styles.darkDayCard : styles.lightDayCard)
+                isSelected ? (isDark ? styles.darkSelectedDayCard : styles.lightSelectedDayCard) : (isDark ? styles.darkDayCard : styles.lightDayCard)
               ]}
             >
               <Text style={[
@@ -66,7 +69,7 @@ export const CalendarStrip: React.FC = () => {
               </Text>
               <View style={styles.dotContainer}>
                 {isRealToday ? (
-                  <View style={[styles.dot, isSelected ? styles.whiteDot : styles.blueDot]} />
+                  <View style={[styles.dot, isSelected ? styles.whiteDot : (isDark ? styles.cyanDot : styles.blueDot)]} />
                 ) : (
                   <View style={[styles.dot, isSelected ? styles.lightBlueDot : styles.greenDot]} />
                 )}
@@ -96,15 +99,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     paddingHorizontal: 8,
-    borderBottomWidth: 1,
+    borderBottomWidth: 1.5,
+    position: 'relative',
   },
   lightContainer: {
-    backgroundColor: '#FFFFFF',
-    borderBottomColor: '#F1F5F9',
+    backgroundColor: Palette.glass.light,
+    borderBottomColor: Palette.glass.lightBorder,
   },
   darkContainer: {
-    backgroundColor: '#0F172A',
-    borderBottomColor: '#1E293B',
+    backgroundColor: Palette.glass.dark,
+    borderBottomColor: Palette.glass.darkBorder,
+  },
+  specularLine: {
+    position: 'absolute',
+    top: 0,
+    left: 20,
+    right: 20,
+    height: 1,
+  },
+  lightSpecular: {
+    backgroundColor: Palette.glass.lightBorderSpecular,
+  },
+  darkSpecular: {
+    backgroundColor: Palette.glass.darkBorderSpecular,
   },
   arrowButton: {
     padding: 6,
@@ -118,24 +135,39 @@ const styles = StyleSheet.create({
   dayCard: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 42,
-    height: 64,
-    borderRadius: 16,
-    paddingVertical: 4,
+    width: 44,
+    height: 66,
+    borderRadius: 18,
+    paddingVertical: 5,
   },
-  selectedDayCard: {
+  lightSelectedDayCard: {
     backgroundColor: '#2563EB',
-    elevation: 3,
+    borderWidth: 1.5,
+    borderColor: '#93C5FD',
+    elevation: 4,
     shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+  },
+  darkSelectedDayCard: {
+    backgroundColor: '#1E3A8A',
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 240, 255, 0.45)',
+    elevation: 6,
+    shadowColor: Palette.neon.cyan,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
   },
   lightDayCard: {
     backgroundColor: 'transparent',
   },
   darkDayCard: {
     backgroundColor: 'transparent',
+  },
+  cyanDot: {
+    backgroundColor: Palette.neon.cyan,
   },
   dayName: {
     fontSize: 10,

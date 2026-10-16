@@ -1,5 +1,5 @@
 /**
- * ChronoTrack Centralized Measurement Engine
+ * ConsisTrack Centralized Measurement Engine
  * Handles standardized calculations for all 6 task measurement types.
  */
 
