@@ -179,6 +179,7 @@ export interface AppSettings {
   alarmEnabled?: boolean;
   pauseAlarmMins?: number;
   alarmSound?: string;
+  alarmSoundUri?: string;
   vibrateEnabled?: boolean;
   // System & Schedule Preferences
   firstDayOfWeek?: 'Monday' | 'Sunday';

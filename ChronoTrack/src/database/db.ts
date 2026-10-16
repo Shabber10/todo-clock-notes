@@ -423,6 +423,7 @@ export function getSettingsFromDb(): AppSettings {
     alarmEnabled: map.get('alarmEnabled') !== 'false',
     pauseAlarmMins: parseInt(map.get('pauseAlarmMins') || '10', 10),
     alarmSound: map.get('alarmSound') || 'Default (Gentle Chime)',
+    alarmSoundUri: map.get('alarmSoundUri') || '',
     vibrateEnabled: map.get('vibrateEnabled') !== 'false',
     firstDayOfWeek: (map.get('firstDayOfWeek') as 'Monday' | 'Sunday') || 'Monday',
     defaultTaskDuration: parseInt(map.get('defaultTaskDuration') || '60', 10),

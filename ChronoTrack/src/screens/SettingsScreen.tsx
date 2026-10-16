@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
 import { useApp } from '../context/AppContext';
 import { Palette } from '../theme/colors';
 import { ClayButton } from '../components/ClayButton';
@@ -39,6 +40,28 @@ export const SettingsScreen: React.FC = () => {
   const pauseAlarmMins = settings.pauseAlarmMins || 10;
   const alarmSound = settings.alarmSound || 'Default (Gentle Chime)';
   const isVibrateEnabled = settings.vibrateEnabled !== false;
+  const isCustomSound = Boolean(alarmSound && !ALARM_SOUNDS.includes(alarmSound));
+
+  const handlePickLocalSound = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['audio/*'],
+        copyToCacheDirectory: true,
+      });
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        const file = res.assets[0];
+        const fileName = file.name || 'Custom Audio';
+        updateSetting('alarmSound', fileName);
+        if (file.uri) {
+          updateSetting('alarmSoundUri', file.uri);
+        }
+        setIsSoundModalOpen(false);
+      }
+    } catch (err) {
+      console.warn('Error picking sound from local storage:', err);
+      Alert.alert('Audio Picker', 'Could not access file. Please check device permissions.');
+    }
+  };
 
   // Popups state
   const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
@@ -812,7 +835,10 @@ export const SettingsScreen: React.FC = () => {
           activeOpacity={1}
           onPress={() => setIsSoundModalOpen(false)}
         >
-          <View style={[styles.modalCard, isDark ? styles.darkModalCard : styles.lightModalCard]}>
+          <View
+            style={[styles.modalCard, isDark ? styles.darkModalCard : styles.lightModalCard]}
+            onStartShouldSetResponder={() => true}
+          >
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, isDark ? styles.darkText : styles.lightText]}>
                 Alarm Sound
@@ -822,40 +848,106 @@ export const SettingsScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            {ALARM_SOUNDS.map((snd) => {
-              const isSelected = alarmSound === snd;
-              return (
-                <TouchableOpacity
-                  key={snd}
-                  onPress={() => {
-                    updateSetting('alarmSound', snd);
-                    setIsSoundModalOpen(false);
-                  }}
-                  style={[
-                    styles.modalOptionItem,
-                    isSelected && (isDark ? styles.modalOptionSelectedDark : styles.modalOptionSelectedLight),
-                  ]}
-                >
-                  <View style={styles.titleIconRow}>
-                    <Ionicons
-                      name="musical-note-outline"
-                      size={18}
-                      color={isSelected ? '#0D9488' : subtextColor}
-                      style={{ marginRight: 10 }}
-                    />
-                    <Text
-                      style={[
-                        styles.modalOptionText,
-                        isSelected ? styles.modalOptionTextActive : (isDark ? styles.darkText : styles.lightText),
-                      ]}
-                    >
-                      {snd}
+            <ScrollView style={{ maxHeight: 460 }} contentContainerStyle={{ paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
+              {/* Option to get sound from local phone storage */}
+              <TouchableOpacity
+                onPress={handlePickLocalSound}
+                style={[
+                  styles.localSoundPickerBtn,
+                  isDark ? styles.darkLocalSoundPickerBtn : styles.lightLocalSoundPickerBtn,
+                ]}
+                activeOpacity={0.75}
+              >
+                <View style={styles.localSoundPickerLeft}>
+                  <View style={[styles.localSoundIconWrap, isDark ? styles.darkLocalSoundIconWrap : styles.lightLocalSoundIconWrap]}>
+                    <Ionicons name="folder-open" size={20} color={isDark ? Palette.neon.cyan : '#0D9488'} />
+                  </View>
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={[styles.localSoundTitle, isDark ? styles.darkText : styles.lightText]}>
+                      Choose from device storage
+                    </Text>
+                    <Text style={[styles.localSoundSubtitle, { color: subtextColor }]}>
+                      Pick audio file from phone (MP3, WAV, etc.)
                     </Text>
                   </View>
-                  {isSelected && <Ionicons name="checkmark-circle" size={18} color="#0D9488" />}
-                </TouchableOpacity>
-              );
-            })}
+                </View>
+                <Ionicons name="add-circle" size={22} color={isDark ? Palette.neon.cyan : '#0D9488'} />
+              </TouchableOpacity>
+
+              {/* Show active custom sound if picked from phone */}
+              {isCustomSound && (
+                <View
+                  style={[
+                    styles.modalOptionItem,
+                    isDark ? styles.modalOptionSelectedDark : styles.modalOptionSelectedLight,
+                    { marginVertical: 4, borderWidth: 1, borderColor: isDark ? 'rgba(45, 212, 191, 0.4)' : '#0D9488' },
+                  ]}
+                >
+                  <View style={[styles.titleIconRow, { flex: 1, marginRight: 8 }]}>
+                    <Ionicons
+                      name="musical-notes"
+                      size={18}
+                      color="#0D9488"
+                      style={{ marginRight: 10 }}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={[styles.modalOptionText, styles.modalOptionTextActive]}
+                        numberOfLines={1}
+                      >
+                        {alarmSound}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: isDark ? Palette.neon.cyan : '#0D9488', fontWeight: '600', marginTop: 1 }}>
+                        Selected from phone storage
+                      </Text>
+                    </View>
+                  </View>
+                  <Ionicons name="checkmark-circle" size={18} color="#0D9488" />
+                </View>
+              )}
+
+              {/* Section Header for Preset Sounds */}
+              <View style={[styles.modalSectionDivider, { borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(148, 163, 184, 0.2)' }]}>
+                <Text style={[styles.modalSectionTitle, { color: subtextColor }]}>
+                  Preset Sounds
+                </Text>
+              </View>
+
+              {ALARM_SOUNDS.map((snd) => {
+                const isSelected = alarmSound === snd;
+                return (
+                  <TouchableOpacity
+                    key={snd}
+                    onPress={() => {
+                      updateSetting('alarmSound', snd);
+                      setIsSoundModalOpen(false);
+                    }}
+                    style={[
+                      styles.modalOptionItem,
+                      isSelected && (isDark ? styles.modalOptionSelectedDark : styles.modalOptionSelectedLight),
+                    ]}
+                  >
+                    <View style={styles.titleIconRow}>
+                      <Ionicons
+                        name="musical-note-outline"
+                        size={18}
+                        color={isSelected ? '#0D9488' : subtextColor}
+                        style={{ marginRight: 10 }}
+                      />
+                      <Text
+                        style={[
+                          styles.modalOptionText,
+                          isSelected ? styles.modalOptionTextActive : (isDark ? styles.darkText : styles.lightText),
+                        ]}
+                      >
+                        {snd}
+                      </Text>
+                    </View>
+                    {isSelected && <Ionicons name="checkmark-circle" size={18} color="#0D9488" />}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -1580,6 +1672,65 @@ const styles = StyleSheet.create({
   dialogBtnText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  localSoundPickerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    marginBottom: 10,
+    borderWidth: 1.5,
+  },
+  lightLocalSoundPickerBtn: {
+    backgroundColor: 'rgba(13, 148, 136, 0.08)',
+    borderColor: 'rgba(13, 148, 136, 0.28)',
+  },
+  darkLocalSoundPickerBtn: {
+    backgroundColor: 'rgba(13, 148, 136, 0.16)',
+    borderColor: 'rgba(45, 212, 191, 0.38)',
+  },
+  localSoundPickerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
+  localSoundIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lightLocalSoundIconWrap: {
+    backgroundColor: 'rgba(13, 148, 136, 0.15)',
+  },
+  darkLocalSoundIconWrap: {
+    backgroundColor: 'rgba(13, 148, 136, 0.3)',
+  },
+  localSoundTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  localSoundSubtitle: {
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  modalSectionDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+  },
+  modalSectionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   darkText: {
     color: '#F8FAFC',
