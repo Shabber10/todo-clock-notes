@@ -1,0 +1,274 @@
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useApp } from '../context/AppContext';
+import { Ionicons } from '@expo/vector-icons';
+import * as db from '../database/db';
+
+export const ProfileScreen: React.FC = () => {
+  const { settings, toggleTheme, refreshData } = useApp();
+  const isDark = settings.theme === 'dark';
+
+  const handleResetData = () => {
+    Alert.alert(
+      'Reset Demo Data',
+      'Are you sure you want to restore the initial demo tasks and goals?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: () => {
+            const database = db.getDatabase();
+            db.seedInitialDatabase(database);
+            refreshData();
+            Alert.alert('Success', 'Database reset to initial demo state.');
+          }
+        }
+      ]
+    );
+  };
+
+  return (
+    <ScrollView style={[styles.container, isDark ? styles.darkBg : styles.lightBg]} contentContainerStyle={{ paddingBottom: 32 }}>
+      {/* Profile Card */}
+      <View style={[styles.profileCard, isDark ? styles.darkCard : styles.lightCard]}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>AJ</Text>
+        </View>
+        <View style={{ flex: 1, marginLeft: 14 }}>
+          <Text style={[styles.name, isDark ? styles.darkText : styles.lightText]}>
+            {settings.userName}
+          </Text>
+          <Text style={styles.email}>{settings.userEmail}</Text>
+        </View>
+      </View>
+
+      {/* Appearance Section */}
+      <View style={[styles.sectionCard, isDark ? styles.darkCard : styles.lightCard]}>
+        <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
+          Appearance
+        </Text>
+        <View style={styles.themeToggleRow}>
+          <TouchableOpacity
+            testID="btn-theme-light"
+            accessibilityLabel="Switch to Light Theme"
+            accessibilityRole="button"
+            accessibilityState={{ selected: !isDark }}
+            onPress={toggleTheme}
+            style={[styles.themeOption, !isDark && styles.themeActive]}
+          >
+            <Ionicons name="sunny" size={18} color={!isDark ? "#2563EB" : "#94A3B8"} />
+            <Text style={[styles.themeText, !isDark && styles.themeTextActive]}>Light</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            testID="btn-theme-dark"
+            accessibilityLabel="Switch to Dark Theme"
+            accessibilityRole="button"
+            accessibilityState={{ selected: isDark }}
+            onPress={toggleTheme}
+            style={[styles.themeOption, isDark && styles.themeActive]}
+          >
+            <Ionicons name="moon" size={18} color={isDark ? "#2563EB" : "#94A3B8"} />
+            <Text style={[styles.themeText, isDark && styles.themeTextActive]}>Dark</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Preferences Section */}
+      <View style={[styles.sectionCard, isDark ? styles.darkCard : styles.lightCard]}>
+        <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
+          Preferences
+        </Text>
+
+        <View style={styles.settingRow}>
+          <View style={styles.settingIconText}>
+            <Ionicons name="time-outline" size={18} color="#2563EB" />
+            <Text style={[styles.settingLabel, isDark ? styles.darkText : styles.lightText]}>
+              Time Format
+            </Text>
+          </View>
+          <Text style={styles.settingValue}>12-hour (AM/PM)</Text>
+        </View>
+
+        <View style={styles.settingRow}>
+          <View style={styles.settingIconText}>
+            <Ionicons name="notifications-outline" size={18} color="#2563EB" />
+            <Text style={[styles.settingLabel, isDark ? styles.darkText : styles.lightText]}>
+              Default Reminder
+            </Text>
+          </View>
+          <Text style={styles.settingValue}>15 mins before</Text>
+        </View>
+
+        <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+          <View style={styles.settingIconText}>
+            <Ionicons name="calendar-outline" size={18} color="#2563EB" />
+            <Text style={[styles.settingLabel, isDark ? styles.darkText : styles.lightText]}>
+              First Day of Week
+            </Text>
+          </View>
+          <Text style={styles.settingValue}>Monday</Text>
+        </View>
+      </View>
+
+      {/* Database & Data Section */}
+      <View style={[styles.sectionCard, isDark ? styles.darkCard : styles.lightCard]}>
+        <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
+          Local Database (SQLite)
+        </Text>
+        <Text style={styles.desc}>
+          All your tasks, habits, and progress are stored safely on this device via SQLite.
+        </Text>
+
+        <TouchableOpacity 
+          testID="btn-reset-demo-data"
+          accessibilityLabel="Restore Sample Demo Data"
+          accessibilityRole="button"
+          onPress={handleResetData} 
+          style={styles.resetBtn}
+        >
+          <Ionicons name="refresh" size={18} color="#DC2626" />
+          <Text style={styles.resetBtnText}>Restore Sample Demo Data</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+  },
+  lightBg: {
+    backgroundColor: '#F8FAFC',
+  },
+  darkBg: {
+    backgroundColor: '#0F172A',
+  },
+  profileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: 14,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#2563EB',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  name: {
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  email: {
+    fontSize: 13,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  sectionCard: {
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 14,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  themeToggleRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  themeOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 6,
+    backgroundColor: '#F1F5F9',
+  },
+  themeActive: {
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#2563EB',
+  },
+  themeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  themeTextActive: {
+    color: '#2563EB',
+    fontWeight: '700',
+  },
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  settingIconText: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  settingLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  settingValue: {
+    fontSize: 13,
+    color: '#64748B',
+  },
+  desc: {
+    fontSize: 12,
+    color: '#64748B',
+    marginBottom: 14,
+  },
+  resetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#FEE2E2',
+  },
+  resetBtnText: {
+    color: '#DC2626',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  lightCard: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#F1F5F9',
+  },
+  darkCard: {
+    backgroundColor: '#1E293B',
+    borderColor: '#334155',
+  },
+  lightText: {
+    color: '#0F172A',
+  },
+  darkText: {
+    color: '#F8FAFC',
+  },
+});

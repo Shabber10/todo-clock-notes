@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Production builds
+dist/
+dist-ssr/
+build/
+**/build/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Expo / React Native
+.expo/
+*/.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+.kotlin/
+*/.kotlin/
+
+# Android build artifacts & private keys
+.gradle/
+**/.gradle/
+**/local.properties
+**/.cxx/
+*.iml
+*.hprof
+**/app/build/
