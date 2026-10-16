@@ -759,7 +759,7 @@ export const SettingsScreen: React.FC = () => {
           </View>
           <View style={{ flex: 1, marginLeft: 14 }}>
             <Text style={[styles.appNameText, isDark ? styles.darkText : styles.lightText]}>
-              Chrono<Text style={{ color: Palette.neon.cyan }}>Track</Text>
+              Consis<Text style={{ color: Palette.neon.cyan }}>Track</Text>
             </Text>
             <Text style={[styles.appVersionText, { color: subtextColor }]}>
               Version 2.0.0 (Release APK)

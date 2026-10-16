@@ -14,7 +14,7 @@ export default {
           200: '#bfdbfe',
           300: '#93c5fd',
           400: '#60a5fa',
-          500: '#2563eb', // ChronoTrack primary blue
+          500: '#2563eb', // ConsisTrack primary blue
           600: '#1d4ed8',
           700: '#1e40af',
         },

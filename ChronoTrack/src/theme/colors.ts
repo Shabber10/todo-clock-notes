@@ -1,5 +1,5 @@
 /**
- * ChronoTrack Design System - 6:3:2 Color Ratio Tokens & Morphism Specs
+ * ConsisTrack Design System - 6:3:2 Color Ratio Tokens & Morphism Specs
  * 
  * Ratio breakdown:
  * - 60% Dominant Canvas (Deep Midnight Obsidian #080C16 / Pure Crisp Frost #F4F7FB)

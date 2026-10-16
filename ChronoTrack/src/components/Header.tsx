@@ -30,7 +30,7 @@ export const Header: React.FC = () => {
           <Ionicons name="time" size={18} color="#FFFFFF" />
         </View>
         <Text style={[styles.brandText, isDark ? styles.darkText : styles.lightText]}>
-          Chrono<Text style={{ color: Palette.neon.cyan }}>Track</Text>
+          Consis<Text style={{ color: Palette.neon.cyan }}>Track</Text>
         </Text>
       </View>
 

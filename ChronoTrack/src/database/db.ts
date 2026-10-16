@@ -14,9 +14,15 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat_5', name: 'Habits', color: '#EC4899', icon: 'repeat' }
 ];
 
+let isDbInitialized = false;
+
 export function getDatabase(): SQLite.SQLiteDatabase {
   if (!db) {
-    db = SQLite.openDatabaseSync('chronotrack.db');
+    db = SQLite.openDatabaseSync('consistrack.db');
+    if (!isDbInitialized) {
+      isDbInitialized = true;
+      initDatabase();
+    }
   }
   return db;
 }
@@ -411,7 +417,12 @@ export function toggleHabitInDb(id: string) {
 
 export function getSettingsFromDb(): AppSettings {
   const database = getDatabase();
-  const rows = database.getAllSync<{ key: string; value: string }>('SELECT * FROM app_settings;');
+  let rows: { key: string; value: string }[] = [];
+  try {
+    rows = database.getAllSync<{ key: string; value: string }>('SELECT * FROM app_settings;');
+  } catch (err) {
+    console.warn('app_settings table query fallback:', err);
+  }
   const map = new Map(rows.map(r => [r.key, r.value]));
 
   return {

@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.chronotrack.app'
+    namespace 'com.consistrack.app'
     defaultConfig {
-        applicationId 'com.chronotrack.app'
+        applicationId 'com.consistrack.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2
