@@ -7,7 +7,7 @@ import { TodayScreen } from './src/screens/TodayScreen';
 import { TrackScreen } from './src/screens/TrackScreen';
 import { GoalsScreen } from './src/screens/GoalsScreen';
 import { HabitsScreen } from './src/screens/HabitsScreen';
-import { ProfileScreen } from './src/screens/ProfileScreen';
+import { SettingsScreen } from './src/screens/SettingsScreen';
 import { AddTaskModal } from './src/components/AddTaskModal';
 import { RecordProgressModal } from './src/components/RecordProgressModal';
 import { MonthCalendarModal } from './src/components/MonthCalendarModal';
@@ -40,7 +40,7 @@ const MainNavigator: React.FC = () => {
         {activeTab === 'track' && <TrackScreen />}
         {activeTab === 'goals' && <GoalsScreen />}
         {activeTab === 'habits' && <HabitsScreen />}
-        {activeTab === 'profile' && <ProfileScreen />}
+        {(activeTab === 'settings' || activeTab === 'profile') && <SettingsScreen />}
       </View>
 
       {/* Fixed Bottom Navigation */}

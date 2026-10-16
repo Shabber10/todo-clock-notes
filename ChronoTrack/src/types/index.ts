@@ -175,4 +175,18 @@ export interface AppSettings {
   userName: string;
   userEmail: string;
   defaultReminderMins: number;
+  // Alarm & Sound card options (from user reference image)
+  alarmEnabled?: boolean;
+  pauseAlarmMins?: number;
+  alarmSound?: string;
+  vibrateEnabled?: boolean;
+  // System & Schedule Preferences
+  firstDayOfWeek?: 'Monday' | 'Sunday';
+  defaultTaskDuration?: number;
+  preStartAlarmEnabled?: boolean;
+  startAlarmEnabled?: boolean;
+  wrapUpAlarmEnabled?: boolean;
+  hapticFeedback?: boolean;
+  completionSound?: boolean;
+  autoRollForward?: boolean;
 }

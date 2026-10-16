@@ -6,7 +6,7 @@ import { format, parseISO, subDays, addDays } from 'date-fns';
 import { Palette } from '../theme/colors';
 
 export const Header: React.FC = () => {
-  const { selectedDate, setSelectedDate, settings, setIsMonthCalendarOpen, toggleTheme } = useApp();
+  const { selectedDate, setSelectedDate, settings, setIsMonthCalendarOpen } = useApp();
   const dateObj = parseISO(selectedDate);
   const formattedMonthYear = format(dateObj, 'MMMM yyyy');
   const isDark = settings.theme === 'dark';
@@ -67,21 +67,6 @@ export const Header: React.FC = () => {
           style={styles.iconButton}
         >
           <Ionicons name="chevron-forward" size={18} color={isDark ? '#94A3B8' : '#64748B'} />
-        </TouchableOpacity>
-
-        {/* Theme Toggle Button */}
-        <TouchableOpacity
-          testID="btn-header-toggle-theme"
-          accessibilityLabel="Toggle Theme"
-          accessibilityRole="button"
-          onPress={toggleTheme}
-          style={[styles.themeToggleBtn, isDark ? styles.darkThemeBtn : styles.lightThemeBtn]}
-        >
-          <Ionicons 
-            name={isDark ? "sunny-outline" : "moon-outline"} 
-            size={16} 
-            color={isDark ? Palette.neon.amberBright : "#2563EB"} 
-          />
         </TouchableOpacity>
       </View>
     </View>

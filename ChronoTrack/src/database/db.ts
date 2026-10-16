@@ -419,8 +419,25 @@ export function getSettingsFromDb(): AppSettings {
     timeFormat: (map.get('timeFormat') as '12h' | '24h') || '12h',
     userName: map.get('userName') || 'User',
     userEmail: map.get('userEmail') || '',
-    defaultReminderMins: parseInt(map.get('defaultReminderMins') || '15', 10)
+    defaultReminderMins: parseInt(map.get('defaultReminderMins') || '15', 10),
+    alarmEnabled: map.get('alarmEnabled') !== 'false',
+    pauseAlarmMins: parseInt(map.get('pauseAlarmMins') || '10', 10),
+    alarmSound: map.get('alarmSound') || 'Default (Gentle Chime)',
+    vibrateEnabled: map.get('vibrateEnabled') !== 'false',
+    firstDayOfWeek: (map.get('firstDayOfWeek') as 'Monday' | 'Sunday') || 'Monday',
+    defaultTaskDuration: parseInt(map.get('defaultTaskDuration') || '60', 10),
+    preStartAlarmEnabled: map.get('preStartAlarmEnabled') !== 'false',
+    startAlarmEnabled: map.get('startAlarmEnabled') !== 'false',
+    wrapUpAlarmEnabled: map.get('wrapUpAlarmEnabled') !== 'false',
+    hapticFeedback: map.get('hapticFeedback') !== 'false',
+    completionSound: map.get('completionSound') !== 'false',
+    autoRollForward: map.get('autoRollForward') === 'true',
   };
+}
+
+export function clearCompletedOccurrencesFromDb() {
+  const database = getDatabase();
+  database.runSync("DELETE FROM occurrences WHERE status = 'completed';");
 }
 
 export function updateSettingInDb(key: string, value: string) {

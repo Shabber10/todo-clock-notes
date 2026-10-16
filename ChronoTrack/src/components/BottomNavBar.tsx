@@ -93,24 +93,24 @@ export const BottomNavBar: React.FC = () => {
         {activeTab === 'goals' && <View style={[styles.activeDot, { backgroundColor: activeColor }]} />}
       </TouchableOpacity>
 
-      {/* 5. Profile Tab */}
+      {/* 5. Settings Tab */}
       <TouchableOpacity
-        testID="btn-tab-profile"
-        accessibilityLabel="Profile Tab"
+        testID="btn-tab-settings"
+        accessibilityLabel="Settings Tab"
         accessibilityRole="tab"
-        accessibilityState={{ selected: activeTab === 'profile' }}
-        onPress={() => setActiveTab('profile')}
+        accessibilityState={{ selected: activeTab === 'settings' || activeTab === 'profile' }}
+        onPress={() => setActiveTab('settings')}
         style={styles.navItem}
       >
         <Ionicons
-          name={activeTab === 'profile' ? 'person' : 'person-outline'}
+          name={(activeTab === 'settings' || activeTab === 'profile') ? 'settings' : 'settings-outline'}
           size={22}
-          color={activeTab === 'profile' ? activeColor : inactiveColor}
+          color={(activeTab === 'settings' || activeTab === 'profile') ? activeColor : inactiveColor}
         />
-        <Text style={[styles.navText, { color: activeTab === 'profile' ? activeColor : inactiveColor }]}>
-          Profile
+        <Text style={[styles.navText, { color: (activeTab === 'settings' || activeTab === 'profile') ? activeColor : inactiveColor }]}>
+          Settings
         </Text>
-        {activeTab === 'profile' && <View style={[styles.activeDot, { backgroundColor: activeColor }]} />}
+        {(activeTab === 'settings' || activeTab === 'profile') && <View style={[styles.activeDot, { backgroundColor: activeColor }]} />}
       </TouchableOpacity>
     </View>
   );
