@@ -77,6 +77,7 @@ export const AddTaskModal: React.FC = () => {
   // Time Picker Modal State
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const [timePickerTarget, setTimePickerTarget] = useState<'start' | 'end'>('start');
+  const [timeActiveSection, setTimeActiveSection] = useState<'hour' | 'minute'>('hour');
   const [pickerHour, setPickerHour] = useState(9);
   const [pickerMinute, setPickerMinute] = useState(0);
   const [pickerPeriod, setPickerPeriod] = useState<'AM' | 'PM'>('AM');
@@ -128,6 +129,7 @@ export const AddTaskModal: React.FC = () => {
   // Open Time Picker Modal
   const openTimePickerModal = (target: 'start' | 'end') => {
     setTimePickerTarget(target);
+    setTimeActiveSection('hour');
     const currentTimeStr = target === 'start' ? startTime : endTime;
     const parts = currentTimeStr.split(':');
     let h = parseInt(parts[0] || '9', 10);
@@ -139,6 +141,22 @@ export const AddTaskModal: React.FC = () => {
     setPickerMinute(m);
     setPickerPeriod(period);
     setIsTimePickerOpen(true);
+  };
+
+  const adjustMinute = (delta: number) => {
+    setPickerMinute(prev => (prev + delta + 60) % 60);
+  };
+
+  const setPickerToNow = () => {
+    const now = new Date();
+    let h = now.getHours();
+    const m = now.getMinutes();
+    const period = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    setPickerHour(h);
+    setPickerMinute(m);
+    setPickerPeriod(period);
   };
 
   // Confirm Time Picker
@@ -697,21 +715,35 @@ export const AddTaskModal: React.FC = () => {
 
             {/* Time Digital Display */}
             <View style={styles.timeDisplayRow}>
-              <View style={[styles.timeBox, isDark ? styles.darkTimeBox : styles.lightTimeBox]}>
+              <TouchableOpacity
+                onPress={() => setTimeActiveSection('hour')}
+                style={[
+                  styles.timeBox, 
+                  isDark ? styles.darkTimeBox : styles.lightTimeBox,
+                  timeActiveSection === 'hour' && styles.timeBoxFocused
+                ]}
+              >
                 <Text style={styles.timeDigitText}>
                   {pickerHour.toString().padStart(2, '0')}
                 </Text>
                 <Text style={styles.timeBoxSub}>HOUR</Text>
-              </View>
+              </TouchableOpacity>
 
               <Text style={[styles.timeColon, isDark ? styles.darkText : styles.lightText]}>:</Text>
 
-              <View style={[styles.timeBox, isDark ? styles.darkTimeBox : styles.lightTimeBox]}>
+              <TouchableOpacity
+                onPress={() => setTimeActiveSection('minute')}
+                style={[
+                  styles.timeBox, 
+                  isDark ? styles.darkTimeBox : styles.lightTimeBox,
+                  timeActiveSection === 'minute' && styles.timeBoxFocused
+                ]}
+              >
                 <Text style={styles.timeDigitText}>
                   {pickerMinute.toString().padStart(2, '0')}
                 </Text>
                 <Text style={styles.timeBoxSub}>MIN</Text>
-              </View>
+              </TouchableOpacity>
 
               {/* AM / PM Toggle */}
               <View style={styles.amPmContainer}>
@@ -732,6 +764,36 @@ export const AddTaskModal: React.FC = () => {
               </View>
             </View>
 
+            {/* Quick Adjust & Stepper Row */}
+            <View style={styles.stepperRow}>
+              <TouchableOpacity 
+                testID="btn-timepicker-minus-1" 
+                onPress={() => adjustMinute(-1)} 
+                style={[styles.stepperBtn, isDark ? styles.darkStepperBtn : styles.lightStepperBtn]}
+              >
+                <Ionicons name="remove" size={16} color={isDark ? '#E2E8F0' : '#0F172A'} />
+                <Text style={[styles.stepperBtnText, isDark ? styles.darkText : styles.lightText]}>-1m</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                testID="btn-timepicker-now" 
+                onPress={setPickerToNow} 
+                style={[styles.nowBtn, isDark ? styles.darkNowBtn : styles.lightNowBtn]}
+              >
+                <Ionicons name="time-outline" size={14} color="#0D9488" style={{ marginRight: 4 }} />
+                <Text style={styles.nowBtnText}>Current Time</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                testID="btn-timepicker-plus-1" 
+                onPress={() => adjustMinute(1)} 
+                style={[styles.stepperBtn, isDark ? styles.darkStepperBtn : styles.lightStepperBtn]}
+              >
+                <Ionicons name="add" size={16} color={isDark ? '#E2E8F0' : '#0F172A'} />
+                <Text style={[styles.stepperBtnText, isDark ? styles.darkText : styles.lightText]}>+1m</Text>
+              </TouchableOpacity>
+            </View>
+
             {/* Hour Quick Selector */}
             <Text style={[styles.pickerSubLabel, isDark ? styles.darkLabel : styles.lightLabel]}>
               Select Hour
@@ -741,7 +803,10 @@ export const AddTaskModal: React.FC = () => {
                 <TouchableOpacity
                   key={h}
                   testID={`btn-timepicker-hour-${h}`}
-                  onPress={() => setPickerHour(h)}
+                  onPress={() => {
+                    setPickerHour(h);
+                    setTimeActiveSection('minute');
+                  }}
                   style={[styles.numBtn, pickerHour === h && styles.numBtnActive]}
                 >
                   <Text style={[styles.numBtnText, pickerHour === h && styles.numBtnTextActive, isDark && pickerHour !== h && styles.darkText]}>
@@ -751,17 +816,20 @@ export const AddTaskModal: React.FC = () => {
               ))}
             </View>
 
-            {/* Minute Quick Selector */}
+            {/* Minute Quick Selector (Full 12 5-min intervals) */}
             <Text style={[styles.pickerSubLabel, isDark ? styles.darkLabel : styles.lightLabel]}>
               Select Minute
             </Text>
             <View style={styles.gridNumbers}>
-              {[0, 15, 30, 45].map((m) => (
+              {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((m) => (
                 <TouchableOpacity
                   key={m}
                   testID={`btn-timepicker-min-${m}`}
-                  onPress={() => setPickerMinute(m)}
-                  style={[styles.numBtnWide, pickerMinute === m && styles.numBtnActive]}
+                  onPress={() => {
+                    setPickerMinute(m);
+                    setTimeActiveSection('minute');
+                  }}
+                  style={[styles.numBtn, pickerMinute === m && styles.numBtnActive]}
                 >
                   <Text style={[styles.numBtnText, pickerMinute === m && styles.numBtnTextActive, isDark && pickerMinute !== m && styles.darkText]}>
                     :{m.toString().padStart(2, '0')}
@@ -1360,6 +1428,56 @@ const styles = StyleSheet.create({
     gap: 6,
     justifyContent: 'space-between',
     marginBottom: 6,
+  },
+  timeBoxFocused: {
+    borderWidth: 2,
+    borderColor: '#0D9488',
+  },
+  stepperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    gap: 8,
+  },
+  stepperBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    gap: 2,
+  },
+  lightStepperBtn: {
+    backgroundColor: '#F1F5F9',
+  },
+  darkStepperBtn: {
+    backgroundColor: '#1E293B',
+  },
+  stepperBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  nowBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: 'rgba(13, 148, 136, 0.12)',
+  },
+  lightNowBtn: {
+    backgroundColor: 'rgba(13, 148, 136, 0.12)',
+  },
+  darkNowBtn: {
+    backgroundColor: 'rgba(13, 148, 136, 0.22)',
+  },
+  nowBtnText: {
+    color: '#0D9488',
+    fontSize: 12,
+    fontWeight: '700',
   },
   numBtn: {
     width: '14.5%',
