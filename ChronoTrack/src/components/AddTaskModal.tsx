@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { MeasurementType, TaskPriority } from '../types';
 import * as db from '../database/db';
+import { MaterialTimePickerModal } from './MaterialTimePickerModal';
 
 interface DayOption {
   key: string;
@@ -77,10 +78,6 @@ export const AddTaskModal: React.FC = () => {
   // Time Picker Modal State
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
   const [timePickerTarget, setTimePickerTarget] = useState<'start' | 'end'>('start');
-  const [timeActiveSection, setTimeActiveSection] = useState<'hour' | 'minute'>('hour');
-  const [pickerHour, setPickerHour] = useState(9);
-  const [pickerMinute, setPickerMinute] = useState(0);
-  const [pickerPeriod, setPickerPeriod] = useState<'AM' | 'PM'>('AM');
 
   const MEASUREMENT_TYPES: { type: MeasurementType; label: string; icon: string }[] = [
     { type: 'quantity', label: 'Quantity (km, pages, etc.)', icon: 'speedometer' },
@@ -129,48 +126,7 @@ export const AddTaskModal: React.FC = () => {
   // Open Time Picker Modal
   const openTimePickerModal = (target: 'start' | 'end') => {
     setTimePickerTarget(target);
-    setTimeActiveSection('hour');
-    const currentTimeStr = target === 'start' ? startTime : endTime;
-    const parts = currentTimeStr.split(':');
-    let h = parseInt(parts[0] || '9', 10);
-    const m = parseInt(parts[1] || '0', 10);
-    const period = h >= 12 ? 'PM' : 'AM';
-    h = h % 12;
-    if (h === 0) h = 12;
-    setPickerHour(h);
-    setPickerMinute(m);
-    setPickerPeriod(period);
     setIsTimePickerOpen(true);
-  };
-
-  const adjustMinute = (delta: number) => {
-    setPickerMinute(prev => (prev + delta + 60) % 60);
-  };
-
-  const setPickerToNow = () => {
-    const now = new Date();
-    let h = now.getHours();
-    const m = now.getMinutes();
-    const period = h >= 12 ? 'PM' : 'AM';
-    h = h % 12;
-    if (h === 0) h = 12;
-    setPickerHour(h);
-    setPickerMinute(m);
-    setPickerPeriod(period);
-  };
-
-  // Confirm Time Picker
-  const handleConfirmTime = () => {
-    let h = pickerHour;
-    if (pickerPeriod === 'PM' && h < 12) h += 12;
-    if (pickerPeriod === 'AM' && h === 12) h = 0;
-    const formatted = `${h.toString().padStart(2, '0')}:${pickerMinute.toString().padStart(2, '0')}`;
-    if (timePickerTarget === 'start') {
-      setStartTime(formatted);
-    } else {
-      setEndTime(formatted);
-    }
-    setIsTimePickerOpen(false);
   };
 
   // Reset Form
@@ -725,165 +681,22 @@ export const AddTaskModal: React.FC = () => {
         </TouchableOpacity>
       </Modal>
 
-      {/* POPUP MODAL 2: Dedicated Time Picker Modal */}
-      <Modal
+      {/* POPUP MODAL 2: Material Design Clock Dial Time Picker */}
+      <MaterialTimePickerModal
         visible={isTimePickerOpen}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsTimePickerOpen(false)}
-      >
-        <View style={styles.popupOverlay}>
-          <View style={[styles.timePickerCard, isDark ? styles.darkSheet : styles.lightSheet]}>
-            <Text style={[styles.popupTitle, isDark ? styles.darkText : styles.lightText, { textAlign: 'center', marginBottom: 12 }]}>
-              {timePickerTarget === 'start' ? 'Set Start Time' : 'Set End Time'}
-            </Text>
-
-            {/* Time Digital Display */}
-            <View style={styles.timeDisplayRow}>
-              <TouchableOpacity
-                onPress={() => setTimeActiveSection('hour')}
-                style={[
-                  styles.timeBox, 
-                  isDark ? styles.darkTimeBox : styles.lightTimeBox,
-                  timeActiveSection === 'hour' && styles.timeBoxFocused
-                ]}
-              >
-                <Text style={styles.timeDigitText}>
-                  {pickerHour.toString().padStart(2, '0')}
-                </Text>
-                <Text style={styles.timeBoxSub}>HOUR</Text>
-              </TouchableOpacity>
-
-              <Text style={[styles.timeColon, isDark ? styles.darkText : styles.lightText]}>:</Text>
-
-              <TouchableOpacity
-                onPress={() => setTimeActiveSection('minute')}
-                style={[
-                  styles.timeBox, 
-                  isDark ? styles.darkTimeBox : styles.lightTimeBox,
-                  timeActiveSection === 'minute' && styles.timeBoxFocused
-                ]}
-              >
-                <Text style={styles.timeDigitText}>
-                  {pickerMinute.toString().padStart(2, '0')}
-                </Text>
-                <Text style={styles.timeBoxSub}>MIN</Text>
-              </TouchableOpacity>
-
-              {/* AM / PM Toggle */}
-              <View style={styles.amPmContainer}>
-                <TouchableOpacity
-                  testID="btn-timepicker-am"
-                  onPress={() => setPickerPeriod('AM')}
-                  style={[styles.amPmButton, pickerPeriod === 'AM' && styles.amPmActive]}
-                >
-                  <Text style={[styles.amPmText, pickerPeriod === 'AM' && styles.amPmTextActive]}>AM</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  testID="btn-timepicker-pm"
-                  onPress={() => setPickerPeriod('PM')}
-                  style={[styles.amPmButton, pickerPeriod === 'PM' && styles.amPmActive]}
-                >
-                  <Text style={[styles.amPmText, pickerPeriod === 'PM' && styles.amPmTextActive]}>PM</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Quick Adjust & Stepper Row */}
-            <View style={styles.stepperRow}>
-              <TouchableOpacity 
-                testID="btn-timepicker-minus-1" 
-                onPress={() => adjustMinute(-1)} 
-                style={[styles.stepperBtn, isDark ? styles.darkStepperBtn : styles.lightStepperBtn]}
-              >
-                <Ionicons name="remove" size={16} color={isDark ? '#E2E8F0' : '#0F172A'} />
-                <Text style={[styles.stepperBtnText, isDark ? styles.darkText : styles.lightText]}>-1m</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                testID="btn-timepicker-now" 
-                onPress={setPickerToNow} 
-                style={[styles.nowBtn, isDark ? styles.darkNowBtn : styles.lightNowBtn]}
-              >
-                <Ionicons name="time-outline" size={14} color="#0D9488" style={{ marginRight: 4 }} />
-                <Text style={styles.nowBtnText}>Current Time</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                testID="btn-timepicker-plus-1" 
-                onPress={() => adjustMinute(1)} 
-                style={[styles.stepperBtn, isDark ? styles.darkStepperBtn : styles.lightStepperBtn]}
-              >
-                <Ionicons name="add" size={16} color={isDark ? '#E2E8F0' : '#0F172A'} />
-                <Text style={[styles.stepperBtnText, isDark ? styles.darkText : styles.lightText]}>+1m</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Hour Quick Selector */}
-            <Text style={[styles.pickerSubLabel, isDark ? styles.darkLabel : styles.lightLabel]}>
-              Select Hour
-            </Text>
-            <View style={styles.gridNumbers}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((h) => (
-                <TouchableOpacity
-                  key={h}
-                  testID={`btn-timepicker-hour-${h}`}
-                  onPress={() => {
-                    setPickerHour(h);
-                    setTimeActiveSection('minute');
-                  }}
-                  style={[styles.numBtn, pickerHour === h && styles.numBtnActive]}
-                >
-                  <Text style={[styles.numBtnText, pickerHour === h && styles.numBtnTextActive, isDark && pickerHour !== h && styles.darkText]}>
-                    {h}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Minute Quick Selector (Full 12 5-min intervals) */}
-            <Text style={[styles.pickerSubLabel, isDark ? styles.darkLabel : styles.lightLabel]}>
-              Select Minute
-            </Text>
-            <View style={styles.gridNumbers}>
-              {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((m) => (
-                <TouchableOpacity
-                  key={m}
-                  testID={`btn-timepicker-min-${m}`}
-                  onPress={() => {
-                    setPickerMinute(m);
-                    setTimeActiveSection('minute');
-                  }}
-                  style={[styles.numBtn, pickerMinute === m && styles.numBtnActive]}
-                >
-                  <Text style={[styles.numBtnText, pickerMinute === m && styles.numBtnTextActive, isDark && pickerMinute !== m && styles.darkText]}>
-                    :{m.toString().padStart(2, '0')}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Actions */}
-            <View style={styles.timePickerActionRow}>
-              <TouchableOpacity
-                testID="btn-timepicker-cancel"
-                onPress={() => setIsTimePickerOpen(false)}
-                style={styles.timeCancelBtn}
-              >
-                <Text style={styles.timeCancelText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                testID="btn-timepicker-confirm"
-                onPress={handleConfirmTime}
-                style={styles.timeConfirmBtn}
-              >
-                <Text style={styles.timeConfirmText}>Confirm Time</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        initialTime={timePickerTarget === 'start' ? startTime : endTime}
+        title={timePickerTarget === 'start' ? 'Select start time' : 'Select end time'}
+        isDark={isDark}
+        onCancel={() => setIsTimePickerOpen(false)}
+        onConfirm={(newTime) => {
+          if (timePickerTarget === 'start') {
+            setStartTime(newTime);
+          } else {
+            setEndTime(newTime);
+          }
+          setIsTimePickerOpen(false);
+        }}
+      />
 
       {/* POPUP MODAL 3: Alarm Sound Picker */}
       <Modal
