@@ -10,36 +10,37 @@ export const ProfileScreen: React.FC = () => {
 
   const handleResetData = () => {
     Alert.alert(
-      'Reset Demo Data',
-      'Are you sure you want to restore the initial demo tasks and goals?',
+      'Clear All Data',
+      'Are you sure you want to clear all tasks, goals, and habits?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Reset',
+          text: 'Clear Data',
           style: 'destructive',
           onPress: () => {
-            const database = db.getDatabase();
-            db.seedInitialDatabase(database);
+            db.clearAllData();
             refreshData();
-            Alert.alert('Success', 'Database reset to initial demo state.');
+            Alert.alert('Success', 'All tasks, goals, and habits have been cleared.');
           }
         }
       ]
     );
   };
 
+  const userInitials = settings.userName ? settings.userName.slice(0, 2).toUpperCase() : 'U';
+
   return (
     <ScrollView style={[styles.container, isDark ? styles.darkBg : styles.lightBg]} contentContainerStyle={{ paddingBottom: 32 }}>
       {/* Profile Card */}
       <View style={[styles.profileCard, isDark ? styles.darkCard : styles.lightCard]}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>AJ</Text>
+          <Text style={styles.avatarText}>{userInitials}</Text>
         </View>
         <View style={{ flex: 1, marginLeft: 14 }}>
           <Text style={[styles.name, isDark ? styles.darkText : styles.lightText]}>
-            {settings.userName}
+            {settings.userName || 'User'}
           </Text>
-          <Text style={styles.email}>{settings.userEmail}</Text>
+          {settings.userEmail ? <Text style={styles.email}>{settings.userEmail}</Text> : null}
         </View>
       </View>
 
@@ -123,13 +124,13 @@ export const ProfileScreen: React.FC = () => {
 
         <TouchableOpacity 
           testID="btn-reset-demo-data"
-          accessibilityLabel="Restore Sample Demo Data"
+          accessibilityLabel="Clear All Tasks and Data"
           accessibilityRole="button"
           onPress={handleResetData} 
           style={styles.resetBtn}
         >
-          <Ionicons name="refresh" size={18} color="#DC2626" />
-          <Text style={styles.resetBtnText}>Restore Sample Demo Data</Text>
+          <Ionicons name="trash-outline" size={18} color="#DC2626" />
+          <Text style={styles.resetBtnText}>Clear All Tasks & Data</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

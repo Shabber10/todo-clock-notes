@@ -35,8 +35,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [settings, setSettings] = useState<AppSettings>({
     theme: 'light',
     timeFormat: '12h',
-    userName: 'Alex Johnson',
-    userEmail: 'alex@example.com',
+    userName: 'User',
+    userEmail: '',
     defaultReminderMins: 15
   });
   const [activeTab, setActiveTab] = useState<'today' | 'track' | 'goals' | 'habits' | 'profile'>('today');

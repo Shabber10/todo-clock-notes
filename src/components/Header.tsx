@@ -136,7 +136,7 @@ export const Header: React.FC = () => {
               className="w-8 h-8 rounded-full object-cover border-2 border-blue-500/20"
             />
             <span className="hidden sm:inline text-sm font-medium text-gray-800 dark:text-gray-200">
-              {user?.name || 'Alex Johnson'}
+              {user?.name || 'User'}
             </span>
           </div>
         </div>

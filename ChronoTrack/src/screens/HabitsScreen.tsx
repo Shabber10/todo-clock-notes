@@ -18,45 +18,57 @@ export const HabitsScreen: React.FC = () => {
         </Text>
       </View>
 
-      {habits.map((habit) => {
-        return (
-          <View key={habit.id} style={[styles.card, isDark ? styles.darkCard : styles.lightCard]}>
-            <View style={styles.infoCol}>
-              <Text style={[styles.habitTitle, isDark ? styles.darkText : styles.lightText]}>
-                {habit.title}
-              </Text>
-              <Text style={styles.habitMeta}>
-                {habit.frequency} • {habit.target}
-              </Text>
-              <View style={styles.streakBadge}>
-                <Ionicons name="flame" size={14} color="#EA580C" />
-                <Text style={styles.streakText}>
-                  {habit.streakCount} day streak
+      {habits.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="repeat-outline" size={48} color={isDark ? '#475569' : '#CBD5E1'} />
+          <Text style={[styles.emptyTitle, isDark ? styles.darkText : styles.lightText]}>
+            No habits tracked yet
+          </Text>
+          <Text style={styles.emptySub}>
+            Build daily routines and streaks to stay consistent and focused
+          </Text>
+        </View>
+      ) : (
+        habits.map((habit) => {
+          return (
+            <View key={habit.id} style={[styles.card, isDark ? styles.darkCard : styles.lightCard]}>
+              <View style={styles.infoCol}>
+                <Text style={[styles.habitTitle, isDark ? styles.darkText : styles.lightText]}>
+                  {habit.title}
                 </Text>
+                <Text style={styles.habitMeta}>
+                  {habit.frequency} • {habit.target}
+                </Text>
+                <View style={styles.streakBadge}>
+                  <Ionicons name="flame" size={14} color="#EA580C" />
+                  <Text style={styles.streakText}>
+                    {habit.streakCount} day streak
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            {/* Checkmark Button */}
-            <TouchableOpacity
-              testID={`btn-habit-toggle-${habit.id}`}
-              accessibilityLabel={`Toggle habit ${habit.title}, currently ${habit.completedToday ? 'completed' : 'incomplete'}`}
-              accessibilityRole="button"
-              accessibilityState={{ selected: habit.completedToday }}
-              onPress={() => toggleHabit(habit.id)}
-              style={[
-                styles.checkBtn,
-                habit.completedToday ? styles.checkBtnDone : (isDark ? styles.darkCheckBtn : styles.lightCheckBtn)
-              ]}
-            >
-              <Ionicons
-                name={habit.completedToday ? "checkmark" : "ellipse-outline"}
-                size={24}
-                color={habit.completedToday ? "#FFFFFF" : (isDark ? "#64748B" : "#CBD5E1")}
-              />
-            </TouchableOpacity>
-          </View>
-        );
-      })}
+              {/* Checkmark Button */}
+              <TouchableOpacity
+                testID={`btn-habit-toggle-${habit.id}`}
+                accessibilityLabel={`Toggle habit ${habit.title}, currently ${habit.completedToday ? 'completed' : 'incomplete'}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: habit.completedToday }}
+                onPress={() => toggleHabit(habit.id)}
+                style={[
+                  styles.checkBtn,
+                  habit.completedToday ? styles.checkBtnDone : (isDark ? styles.darkCheckBtn : styles.lightCheckBtn)
+                ]}
+              >
+                <Ionicons
+                  name={habit.completedToday ? "checkmark" : "ellipse-outline"}
+                  size={24}
+                  color={habit.completedToday ? "#FFFFFF" : (isDark ? "#64748B" : "#CBD5E1")}
+                />
+              </TouchableOpacity>
+            </View>
+          );
+        })
+      )}
     </ScrollView>
   );
 };
@@ -147,5 +159,23 @@ const styles = StyleSheet.create({
   },
   darkText: {
     color: '#F8FAFC',
+  },
+  emptyContainer: {
+    paddingVertical: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 14,
+    marginBottom: 6,
+  },
+  emptySub: {
+    fontSize: 13,
+    color: '#94A3B8',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

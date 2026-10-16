@@ -35,48 +35,60 @@ export const GoalsScreen: React.FC = () => {
       </View>
 
       {/* Goal Cards */}
-      {filteredGoals.map(goal => {
-        const pct = Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100));
+      {filteredGoals.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="trophy-outline" size={48} color={isDark ? '#475569' : '#CBD5E1'} />
+          <Text style={[styles.emptyTitle, isDark ? styles.darkText : styles.lightText]}>
+            No {tab} goals
+          </Text>
+          <Text style={styles.emptySub}>
+            Create goals to track long-term targets and personal achievements
+          </Text>
+        </View>
+      ) : (
+        filteredGoals.map(goal => {
+          const pct = Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100));
 
-        return (
-          <View 
-            key={goal.id} 
-            testID={`card-goal-${goal.id}`}
-            accessibilityLabel={`Goal ${goal.title}, ${goal.currentValue} of ${goal.targetValue} ${goal.unit}`}
-            style={[styles.card, isDark ? styles.darkCard : styles.lightCard]}
-          >
-            <View style={styles.headerRow}>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{goal.category}</Text>
+          return (
+            <View 
+              key={goal.id} 
+              testID={`card-goal-${goal.id}`}
+              accessibilityLabel={`Goal ${goal.title}, ${goal.currentValue} of ${goal.targetValue} ${goal.unit}`}
+              style={[styles.card, isDark ? styles.darkCard : styles.lightCard]}
+            >
+              <View style={styles.headerRow}>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{goal.category}</Text>
+                </View>
+                <Text style={styles.periodText}>{goal.period.toUpperCase()}</Text>
               </View>
-              <Text style={styles.periodText}>{goal.period.toUpperCase()}</Text>
-            </View>
 
-            <Text style={[styles.title, isDark ? styles.darkText : styles.lightText]}>
-              {goal.title}
-            </Text>
-            <Text style={styles.desc}>{goal.description}</Text>
-
-            {/* Target and progress info */}
-            <View style={styles.progressRow}>
-              <Text style={[styles.progressValues, isDark ? styles.darkText : styles.lightText]}>
-                {goal.currentValue} / {goal.targetValue} {goal.unit}
+              <Text style={[styles.title, isDark ? styles.darkText : styles.lightText]}>
+                {goal.title}
               </Text>
-              <Text style={styles.percentageText}>{pct}%</Text>
-            </View>
+              <Text style={styles.desc}>{goal.description}</Text>
 
-            {/* Progress Track */}
-            <View style={[styles.track, isDark ? styles.darkTrack : styles.lightTrack]}>
-              <View style={[styles.thumb, { width: `${pct}%` }]} />
-            </View>
+              {/* Target and progress info */}
+              <View style={styles.progressRow}>
+                <Text style={[styles.progressValues, isDark ? styles.darkText : styles.lightText]}>
+                  {goal.currentValue} / {goal.targetValue} {goal.unit}
+                </Text>
+                <Text style={styles.percentageText}>{pct}%</Text>
+              </View>
 
-            <View style={styles.footerRow}>
-              <Text style={styles.deadlineText}>Deadline: {goal.deadline}</Text>
-              <Ionicons name="chevron-forward" size={16} color={isDark ? '#64748B' : '#94A3B8'} />
+              {/* Progress Track */}
+              <View style={[styles.track, isDark ? styles.darkTrack : styles.lightTrack]}>
+                <View style={[styles.thumb, { width: `${pct}%` }]} />
+              </View>
+
+              <View style={styles.footerRow}>
+                <Text style={styles.deadlineText}>Deadline: {goal.deadline}</Text>
+                <Ionicons name="chevron-forward" size={16} color={isDark ? '#64748B' : '#94A3B8'} />
+              </View>
             </View>
-          </View>
-        );
-      })}
+          );
+        })
+      )}
     </ScrollView>
   );
 };
@@ -220,5 +232,23 @@ const styles = StyleSheet.create({
   },
   darkSub: {
     color: '#94A3B8',
+  },
+  emptyContainer: {
+    paddingVertical: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 14,
+    marginBottom: 6,
+  },
+  emptySub: {
+    fontSize: 13,
+    color: '#94A3B8',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });
