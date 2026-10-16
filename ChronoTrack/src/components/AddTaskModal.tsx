@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -51,20 +51,20 @@ export const AddTaskModal: React.FC = () => {
   // Core Form State
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [categoryId, setCategoryId] = useState(categories[0]?.id || 'cat_1');
-  const [priority, setPriority] = useState<TaskPriority>('medium');
+  const [categoryId, setCategoryId] = useState('');
+  const [priority, setPriority] = useState<TaskPriority | null>(null);
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
 
   // Measurement State
   const [measurementType, setMeasurementType] = useState<MeasurementType>('quantity');
   const [isMeasurementPopupOpen, setIsMeasurementPopupOpen] = useState(false);
-  const [targetAmount, setTargetAmount] = useState('5');
-  const [unit, setUnit] = useState('km');
-  const [plannedMinutes, setPlannedMinutes] = useState('60');
+  const [targetAmount, setTargetAmount] = useState('');
+  const [unit, setUnit] = useState('');
+  const [plannedMinutes, setPlannedMinutes] = useState('');
 
-  // Repeat / Days of week state (from user's image)
-  const [selectedDays, setSelectedDays] = useState<string[]>(['mon', 'tue', 'wed', 'thu', 'fri']);
+  // Repeat / Days of week state (all unselected by default)
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   // Alarm & Sound state (from user's image)
   const [isAlarmEnabled, setIsAlarmEnabled] = useState(true);
@@ -105,7 +105,7 @@ export const AddTaskModal: React.FC = () => {
   // Format Repeat Summary Text
   const getRepeatSummary = () => {
     if (selectedDays.length === 7) return 'Everyday';
-    if (selectedDays.length === 0) return 'Alarm is off / Only once';
+    if (selectedDays.length === 0) return 'No repeat (Once)';
     const isWeekdays = selectedDays.length === 5 && !selectedDays.includes('sun') && !selectedDays.includes('sat');
     if (isWeekdays) return 'Weekdays (Mon - Fri)';
     const isWeekends = selectedDays.length === 2 && selectedDays.includes('sun') && selectedDays.includes('sat');
@@ -159,15 +159,23 @@ export const AddTaskModal: React.FC = () => {
   const resetForm = () => {
     setTitle('');
     setDescription('');
+    setCategoryId('');
+    setPriority(null);
     setStartTime('09:00');
     setEndTime('10:00');
     setMeasurementType('quantity');
-    setTargetAmount('5');
-    setUnit('km');
-    setPlannedMinutes('60');
-    setSelectedDays(['mon', 'tue', 'wed', 'thu', 'fri']);
+    setTargetAmount('');
+    setUnit('');
+    setPlannedMinutes('');
+    setSelectedDays([]);
     setIsAlarmEnabled(true);
   };
+
+  useEffect(() => {
+    if (isAddTaskModalOpen) {
+      resetForm();
+    }
+  }, [isAddTaskModalOpen]);
 
   // Save Task
   const handleSaveTask = () => {
@@ -192,17 +200,27 @@ export const AddTaskModal: React.FC = () => {
       measurementConfig = { maxRating: 5 };
     }
 
+    const finalCategoryId = categoryId || categories[0]?.id || 'cat_1';
+    const finalPriority: TaskPriority = priority || 'medium';
+    const recurrence = selectedDays.length === 7 
+      ? 'daily' 
+      : selectedDays.length === 5 && !selectedDays.includes('sun') && !selectedDays.includes('sat')
+      ? 'weekdays' 
+      : selectedDays.length > 0 
+      ? 'weekly' 
+      : 'one_time';
+
     const newTask = {
       id: `tsk_${Date.now()}`,
       title,
       description,
-      categoryId,
-      priority,
+      categoryId: finalCategoryId,
+      priority: finalPriority,
       measurementType,
       measurementConfig,
       scheduledStart: startTime,
       scheduledEnd: endTime,
-      recurrence: selectedDays.length === 7 ? 'daily' : (selectedDays.length === 5 ? 'weekdays' : 'weekly'),
+      recurrence,
     };
 
     db.insertNewTaskInDb(newTask as any, selectedDate);
@@ -420,6 +438,8 @@ export const AddTaskModal: React.FC = () => {
                   <TextInput
                     testID="input-target-amount"
                     accessibilityLabel="Target Amount Input"
+                    placeholder="e.g. 5"
+                    placeholderTextColor={isDark ? '#64748B' : '#94A3B8'}
                     style={[styles.input, isDark ? styles.darkInput : styles.lightInput]}
                     keyboardType="numeric"
                     value={targetAmount}
@@ -433,6 +453,8 @@ export const AddTaskModal: React.FC = () => {
                   <TextInput
                     testID="input-target-unit"
                     accessibilityLabel="Target Unit Input"
+                    placeholder="e.g. km, pages"
+                    placeholderTextColor={isDark ? '#64748B' : '#94A3B8'}
                     style={[styles.input, isDark ? styles.darkInput : styles.lightInput]}
                     value={unit}
                     onChangeText={setUnit}
@@ -449,6 +471,8 @@ export const AddTaskModal: React.FC = () => {
                 <TextInput
                   testID="input-planned-minutes"
                   accessibilityLabel="Planned Duration Minutes Input"
+                  placeholder="e.g. 60"
+                  placeholderTextColor={isDark ? '#64748B' : '#94A3B8'}
                   style={[styles.input, isDark ? styles.darkInput : styles.lightInput]}
                   keyboardType="numeric"
                   value={plannedMinutes}
