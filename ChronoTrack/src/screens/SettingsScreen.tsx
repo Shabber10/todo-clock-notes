@@ -122,37 +122,7 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 2. User Profile / Account Card */}
-      <View style={[styles.glassCard, isDark ? styles.darkCard : styles.lightCard]}>
-        <View style={styles.specularLine} />
-        <View style={styles.profileRow}>
-          <View style={[styles.avatarCircle, isDark ? styles.darkAvatarGlow : styles.lightAvatarGlow]}>
-            <Text style={styles.avatarText}>{userInitials}</Text>
-          </View>
-          <View style={{ flex: 1, marginLeft: 14 }}>
-            <Text style={[styles.profileName, isDark ? styles.darkText : styles.lightText]}>
-              {settings.userName || 'User'}
-            </Text>
-            <Text style={[styles.profileEmail, { color: subtextColor }]}>
-              {settings.userEmail || 'ChronoTrack Local Account'}
-            </Text>
-          </View>
-          <TouchableOpacity
-            testID="btn-edit-profile"
-            accessibilityLabel="Edit Profile"
-            accessibilityRole="button"
-            onPress={() => {
-              setTempName(settings.userName || 'User');
-              setTempEmail(settings.userEmail || '');
-              setIsEditProfileOpen(true);
-            }}
-            style={[styles.editProfileBtn, isDark ? styles.darkPillBtn : styles.lightPillBtn]}
-          >
-            <Ionicons name="pencil" size={14} color={accentColor} style={{ marginRight: 4 }} />
-            <Text style={[styles.editProfileBtnText, { color: accentColor }]}>Edit</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+     
 
       {/* 3. Appearance Section (Dark & Light Mode) */}
       <View style={[styles.glassCard, isDark ? styles.darkCard : styles.lightCard]}>
@@ -171,40 +141,72 @@ export const SettingsScreen: React.FC = () => {
           Choose your interface mode:
         </Text>
 
-        <View style={styles.themeSelectorRow}>
-          <ClayButton
+        <View style={[styles.themeSegmentTrack, isDark ? styles.darkSegmentTrack : styles.lightSegmentTrack]}>
+          <TouchableOpacity
             testID="btn-theme-light"
-            accessibilityLabel="Light Theme Option"
+            accessibilityLabel="Switch to Light Mode"
+            accessibilityRole="button"
+            accessibilityState={{ selected: !isDark }}
             onPress={() => {
               if (isDark) toggleTheme();
             }}
-            isDark={isDark}
-            variant={!isDark ? 'primary' : 'secondary'}
-            borderRadius={16}
-            style={styles.themeClayBtn}
+            style={[
+              styles.themeSegmentItem,
+              !isDark ? styles.activeSegmentLight : styles.inactiveSegment,
+            ]}
           >
-            <Ionicons name="sunny" size={20} color={!isDark ? '#FFFFFF' : '#94A3B8'} style={{ marginRight: 8 }} />
-            <Text style={[styles.themeClayBtnText, { color: !isDark ? '#FFFFFF' : '#94A3B8' }]}>
+            <View style={[styles.themeIconCircle, !isDark ? styles.sunCircleActive : styles.iconCircleInactive]}>
+              <Ionicons
+                name="sunny"
+                size={18}
+                color={!isDark ? '#F59E0B' : (isDark ? '#94A3B8' : '#64748B')}
+              />
+            </View>
+            <Text
+              style={[
+                styles.themeSegmentText,
+                !isDark ? styles.activeTextLight : (isDark ? styles.inactiveTextDark : styles.inactiveTextLight),
+              ]}
+            >
               Light Mode
             </Text>
-          </ClayButton>
+            {!isDark && (
+              <Ionicons name="checkmark-circle" size={16} color="#2563EB" style={{ marginLeft: 6 }} />
+            )}
+          </TouchableOpacity>
 
-          <ClayButton
+          <TouchableOpacity
             testID="btn-theme-dark"
-            accessibilityLabel="Dark Theme Option"
+            accessibilityLabel="Switch to Dark Mode"
+            accessibilityRole="button"
+            accessibilityState={{ selected: isDark }}
             onPress={() => {
               if (!isDark) toggleTheme();
             }}
-            isDark={isDark}
-            variant={isDark ? 'accent' : 'secondary'}
-            borderRadius={16}
-            style={styles.themeClayBtn}
+            style={[
+              styles.themeSegmentItem,
+              isDark ? styles.activeSegmentDark : styles.inactiveSegment,
+            ]}
           >
-            <Ionicons name="moon" size={20} color={isDark ? '#080C16' : '#94A3B8'} style={{ marginRight: 8 }} />
-            <Text style={[styles.themeClayBtnText, { color: isDark ? '#080C16' : '#94A3B8', fontWeight: '700' }]}>
+            <View style={[styles.themeIconCircle, isDark ? styles.moonCircleActive : styles.iconCircleInactive]}>
+              <Ionicons
+                name="moon"
+                size={18}
+                color={isDark ? Palette.neon.cyan : '#64748B'}
+              />
+            </View>
+            <Text
+              style={[
+                styles.themeSegmentText,
+                isDark ? styles.activeTextDark : (isDark ? styles.inactiveTextDark : styles.inactiveTextLight),
+              ]}
+            >
               Dark Mode
             </Text>
-          </ClayButton>
+            {isDark && (
+              <Ionicons name="checkmark-circle" size={16} color={Palette.neon.cyan} style={{ marginLeft: 6 }} />
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -1193,20 +1195,88 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 12,
   },
-  themeSelectorRow: {
+  themeSegmentTrack: {
     flexDirection: 'row',
-    gap: 12,
+    padding: 5,
+    borderRadius: 18,
+    gap: 8,
   },
-  themeClayBtn: {
+  lightSegmentTrack: {
+    backgroundColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: '#CBD5E1',
+  },
+  darkSegmentTrack: {
+    backgroundColor: '#0A0F1E',
+    borderWidth: 1.2,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  themeSegmentItem: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 14,
   },
-  themeClayBtnText: {
+  activeSegmentLight: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.25)',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.16,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  activeSegmentDark: {
+    backgroundColor: '#131D33',
+    borderWidth: 1.2,
+    borderColor: 'rgba(0, 240, 255, 0.45)',
+    shadowColor: Palette.neon.cyan,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  inactiveSegment: {
+    backgroundColor: 'transparent',
+  },
+  themeIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  sunCircleActive: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+  },
+  moonCircleActive: {
+    backgroundColor: 'rgba(0, 240, 255, 0.15)',
+  },
+  iconCircleInactive: {
+    backgroundColor: 'rgba(148, 163, 184, 0.12)',
+  },
+  themeSegmentText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  activeTextLight: {
+    color: '#0F172A',
+    fontWeight: '700',
+  },
+  activeTextDark: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  inactiveTextLight: {
+    color: '#64748B',
+  },
+  inactiveTextDark: {
+    color: '#64748B',
   },
   referenceAlarmCard: {
     borderRadius: 16,
